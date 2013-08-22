@@ -108,13 +108,46 @@ class FragmentInfo:
 	def grammar(self, value):
 		self._grammar = value
 
+class RuleTypes:
+	TOKEN = 2
+	FRAGMENT = 3
+
+class RuleInfo:
+	def __init__(self, name, rule_type, grammar):
+		self._name = name
+		self._type = rule_type
+		self._grammar = grammar
+
+	def __repr__(self):
+		return '{} {}'.format(self.__class__.__name__, str(self.__dict__))
+
+	def __eq__(self, other):
+		return self.__dict__ == other.__dict__
+
+	@property
+	def name(self):
+		return self._name
+
+	@property
+	def type(self):
+		return self._type
+
+	@property
+	def grammar(self):
+		return self._grammar
+
 class Context:
 	def __init__(self):
 		self._properties = {}
+		self._rules = {}
 
 	@property
 	def properties(self):
 		return self._properties
+
+	@property
+	def rules(self):
+		return self._rules
 
 class SourceIterator:
 	EOF = '<end-of-file>';
@@ -248,10 +281,14 @@ class Parser:
 				continue
 
 			success, token_info = self.try_token(contents_iterator)
-			if success: continue
+			if success:
+				context.rules().set(token_info.name(), RuleTypes.TOKEN, token_info.grammar())
+				continue
 
 			success, fragment_info = self.try_fragment(contents_iterator)
-			if success: continue
+			if success:
+				context.rules().set(fragment_info.name(), RuleTypes.FRAGMENT, fragment_info.grammar())
+				continue
 
 			raise ParserException('Unknown token.')
 
