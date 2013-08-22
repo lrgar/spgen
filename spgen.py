@@ -77,6 +77,37 @@ class TokenInfo:
 	def grammar(self, value):
 		self._grammar = value
 
+class FragmentInfo:
+	def __init__(self):
+		self._name = ''
+		self._grammar = ''
+
+	def __init__(self, name, grammar):
+		self._name = name
+		self._grammar = grammar
+
+	def __repr__(self):
+		return '{} {}'.format(self.__class__.__name__, str(self.__dict__))
+
+	def __eq__(self, other):
+		return self.__dict__ == other.__dict__
+
+	@property
+	def name(self):
+		return self._name
+
+	@name.setter
+	def name(self, value):
+		self._name = value
+
+	@property
+	def grammar(self):
+		return self._grammar
+
+	@grammar.setter
+	def grammar(self, value):
+		self._grammar = value
+
 class Context:
 	def __init__(self):
 		self._properties = {}
@@ -274,6 +305,20 @@ class Parser:
 				if grammar is not None and self.expect_token(source_iterator, ';', alphanumeric_token = False):
 					source_iterator.release()
 					return True, TokenInfo(name, grammar)
+
+		source_iterator.restore()
+		return False, None
+
+	def try_fragment(self, source_iterator):
+		source_iterator.backup()
+
+		if self.expect_token(source_iterator, 'fragment', alphanumeric_token = True):
+			name = self.expect_identifier(source_iterator)
+			if name is not None and self.expect_token(source_iterator, ':', alphanumeric_token = False):
+				grammar = self.expect_token_grammar(source_iterator)
+				if grammar is not None and self.expect_token(source_iterator, ';', alphanumeric_token = False):
+					source_iterator.release()
+					return True, FragmentInfo(name, grammar)
 
 		source_iterator.restore()
 		return False, None

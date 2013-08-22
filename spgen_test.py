@@ -8,7 +8,7 @@
 # Requires Python3
 
 import unittest
-from cgen import *
+from spgen import *
 
 class TestParser(unittest.TestCase):
 	def test_eof_detection_1(self):
@@ -197,6 +197,56 @@ class TestParser(unittest.TestCase):
 
 	def test_token_detection_11(self):
 		result, token_info = Parser().try_token(SourceIterator(''))
+		self.assertEqual(result, False)
+
+	def test_fragment_detection_1(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator('fragment var : \'var\';'))
+		self.assertEqual(result, True)
+		self.assertEqual(fragment_info, FragmentInfo('var', GrammarConstant('var')))
+
+	def test_fragment_detection_2(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator('fragment rule : anotherRule zeroOrMany* ;'))
+		self.assertEqual(result, True)
+		self.assertEqual(fragment_info, FragmentInfo('rule',
+			GrammarExpressionList([
+				GrammarReference('anotherRule'),
+				GrammarZeroOrMany(GrammarReference('zeroOrMany'))
+			])))
+
+	def test_fragment_detection_3(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator('fragment var : a (;'))
+		self.assertEqual(result, False)
+
+	def test_fragment_detection_4(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator('fragment var : *;'))
+		self.assertEqual(result, False)
+
+	def test_fragment_detection_5(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator('fragment 4 : a (;'))
+		self.assertEqual(result, False)
+
+	def test_fragment_detection_6(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator('fragment : a (;'))
+		self.assertEqual(result, False)
+
+	def test_fragment_detection_7(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator('tvar : a (;'))
+		self.assertEqual(result, False)
+
+	def test_fragment_detection_8(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator('fragment var : ;'))
+		self.assertEqual(result, False)
+
+	def test_fragment_detection_9(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator('fragment var ;'))
+		self.assertEqual(result, False)
+
+	def test_fragment_detection_10(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator(';'))
+		self.assertEqual(result, False)
+
+	def test_fragment_detection_11(self):
+		result, fragment_info = Parser().try_fragment(SourceIterator(''))
 		self.assertEqual(result, False)
 
 class TestTokenRuleGrammarParser(unittest.TestCase):
