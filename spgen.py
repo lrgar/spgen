@@ -16,10 +16,6 @@ class ParserException(Exception):
 	pass
 
 class PropertyInfo:
-	def __init__(self):
-		self._name = ''
-		self._value = ''
-
 	def __init__(self, name, value):
 		self._name = name
 		self._value = value
@@ -34,23 +30,11 @@ class PropertyInfo:
 	def name(self):
 		return self._name
 
-	@name.setter
-	def name(self, value):
-		self._name = value
-
 	@property
 	def value(self):
 		return self._value
 
-	@value.setter
-	def value(self, value):
-		self._value = value
-
 class TokenInfo:
-	def __init__(self):
-		self._name = ''
-		self._grammar = ''
-
 	def __init__(self, name, grammar):
 		self._name = name
 		self._grammar = grammar
@@ -65,23 +49,11 @@ class TokenInfo:
 	def name(self):
 		return self._name
 
-	@name.setter
-	def name(self, value):
-		self._name = value
-
 	@property
 	def grammar(self):
 		return self._grammar
-
-	@grammar.setter
-	def grammar(self, value):
-		self._grammar = value
 
 class FragmentInfo:
-	def __init__(self):
-		self._name = ''
-		self._grammar = ''
-
 	def __init__(self, name, grammar):
 		self._name = name
 		self._grammar = grammar
@@ -96,17 +68,9 @@ class FragmentInfo:
 	def name(self):
 		return self._name
 
-	@name.setter
-	def name(self, value):
-		self._name = value
-
 	@property
 	def grammar(self):
 		return self._grammar
-
-	@grammar.setter
-	def grammar(self, value):
-		self._grammar = value
 
 class RuleTypes:
 	TOKEN = 2
