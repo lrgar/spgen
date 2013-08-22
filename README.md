@@ -1,6 +1,6 @@
 # spgen
 
-_Simple Parser Generator_ is a small tool for creating parsers for C++, and maybe sometime other
+_Simple Parser Generator_ is a small tool for creating parsers for C++, and maybe sometime, other
 languages.
 
 ## Background
@@ -10,7 +10,7 @@ easy to install and use so I end up creating my own. It's still fun anyway.
 
 ## Development
 
-This project is in development, it doesn't even fullfil its goal, so don't use it. Yet.
+This project is in development, it doesn't even fulfill its goal, so don't use it. Yet.
 
 ## License
 
