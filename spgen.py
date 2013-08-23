@@ -240,13 +240,12 @@ class GrammarZeroOrOne(GrammarExpression):
 		return self._expression
 
 class Parser:
-	def process_file(self, file_path):
+	def process_file(self, file_path, context):
 		with open(input_file_path, 'r') as input_file:
 			contents = input_file.read()
-			self.process_text(contents)
+			self.process_text(contents, context)
 
-	def process_text(self, contents):
-		context = Context()
+	def process_text(self, contents, context):
 		self.free_context(SourceIterator(contents), context)
 		return context
 
@@ -485,6 +484,7 @@ class Parser:
 
 def main(args):
 	parser = Parser()
+	context = Context()
 	#context = parser.process_file('')
 	pass
 
