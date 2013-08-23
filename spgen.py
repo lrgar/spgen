@@ -105,6 +105,12 @@ class Context:
 		self._properties = {}
 		self._rules = {}
 
+	def __repr__(self):
+		return '{} {}'.format(self.__class__.__name__, str(self.__dict__))
+
+	def __eq__(self, other):
+		return self.__dict__ == other.__dict__
+
 	@property
 	def properties(self):
 		return self._properties
@@ -152,10 +158,23 @@ class SourceIterator:
 		self._current_position = self._current_position + 1
 		return self
 
+	@property
 	def current_item(self):
 		if self._current_position == len(self._text):
 			return SourceIterator.EOF
 		return self._text[self._current_position]
+
+	@property
+	def current_position(self):
+		return self._current_position
+
+	@property
+	def current_column(self):
+		return self._current_column
+
+	@property
+	def current_line(self):
+		return self._current_line
 
 class GrammarExpression:
 	def __repr__(self):
@@ -233,34 +252,37 @@ class Parser:
 
 	def free_context(self, source_iterator, context):
 		while True:
-			success = self.try_eof(contents_iterator)
+			success = self.try_eof(source_iterator)
 			if success: break
 
-			success = self.try_comment(contents_iterator, context)
+			success = self.try_comment(source_iterator)
 			if success: continue
 
-			success, property_info = self.try_property(contents_iterator)
+			success, property_info = self.try_property(source_iterator)
 			if success:
-				context.properties().set(property_info.name(), property_info.value())
+				context.properties[property_info.name] = property_info.value
 				continue
 
-			success, token_info = self.try_token(contents_iterator)
+			success, token_info = self.try_token(source_iterator)
 			if success:
-				context.rules().set(token_info.name(), RuleTypes.TOKEN, token_info.grammar())
+				context.rules[token_info.name] = RuleInfo(token_info.name, RuleTypes.TOKEN, token_info.grammar)
 				continue
 
-			success, fragment_info = self.try_fragment(contents_iterator)
+			success, fragment_info = self.try_fragment(source_iterator)
 			if success:
-				context.rules().set(fragment_info.name(), RuleTypes.FRAGMENT, fragment_info.grammar())
+				context.rules[fragment_info.name] = RuleInfo(fragment_info.name, RuleTypes.FRAGMENT, fragment_info.grammar)
 				continue
 
-			raise ParserException('Unknown token.')
+			raise ParserException(
+				'Unknown token at line: {0}, column {1}.'.format(
+					source_iterator.current_line,
+					source_iterator.current_column))
 
 	def try_eof(self, source_iterator):
 		source_iterator.backup()
 		self.skip_whitespace(source_iterator)
 
-		if source_iterator.current_item() == SourceIterator.EOF:
+		if source_iterator.current_item == SourceIterator.EOF:
 			source_iterator.release()
 			return True
 		else:
@@ -271,10 +293,10 @@ class Parser:
 		source_iterator.backup()
 		self.skip_whitespace(source_iterator)
 
-		if source_iterator.current_item() == '/':
+		if source_iterator.current_item == '/':
 			source_iterator.next()
-			if source_iterator.current_item() == '/':
-				while source_iterator.current_item() != SourceIterator.EOF and source_iterator.current_item() != '\n':
+			if source_iterator.current_item == '/':
+				while source_iterator.current_item != SourceIterator.EOF and source_iterator.current_item != '\n':
 					source_iterator.next()
 				source_iterator.release()
 				return True
@@ -329,14 +351,14 @@ class Parser:
 		self.skip_whitespace(source_iterator)
 
 		token_index = 0
-		while token_index < len(token) and source_iterator.current_item() == token[token_index]:
+		while token_index < len(token) and source_iterator.current_item == token[token_index]:
 			token_index = token_index + 1
 			source_iterator.next()
 
 		valid = token_index == len(token)
 
 		if valid and alphanumeric_token:
-			if self.is_alphanumeric(source_iterator.current_item()):
+			if self.is_alphanumeric(source_iterator.current_item):
 				valid = False
 
 		if valid:
@@ -351,11 +373,11 @@ class Parser:
 		self.skip_whitespace(source_iterator)
 
 		identifier = ''
-		if self.is_alpha(source_iterator.current_item()):
-			identifier += source_iterator.current_item()
+		if self.is_alpha(source_iterator.current_item):
+			identifier += source_iterator.current_item
 			source_iterator.next()
-			while self.is_alphanumeric(source_iterator.current_item()):
-				identifier += source_iterator.current_item()
+			while self.is_alphanumeric(source_iterator.current_item):
+				identifier += source_iterator.current_item
 				source_iterator.next()
 
 			source_iterator.release()
@@ -369,13 +391,13 @@ class Parser:
 		self.skip_whitespace(source_iterator)
 
 		identifier = ''
-		if source_iterator.current_item() == '\'':
+		if source_iterator.current_item == '\'':
 			source_iterator.next()
-			while source_iterator.current_item() != SourceIterator.EOF and source_iterator.current_item() != '\'':
-				identifier += source_iterator.current_item()
+			while source_iterator.current_item != SourceIterator.EOF and source_iterator.current_item != '\'':
+				identifier += source_iterator.current_item
 				source_iterator.next()
 
-			if source_iterator.current_item() == '\'':
+			if source_iterator.current_item == '\'':
 				source_iterator.next()
 				source_iterator.release()
 				return identifier
@@ -452,7 +474,7 @@ class Parser:
 		return None
 
 	def skip_whitespace(self, source_iterator):
-		while source_iterator.current_item() in string.whitespace:
+		while source_iterator.current_item in string.whitespace:
 			source_iterator.next()
 
 	def is_alphanumeric(self, character):

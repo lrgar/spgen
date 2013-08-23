@@ -249,6 +249,27 @@ class TestParser(unittest.TestCase):
 		result, fragment_info = Parser().try_fragment(SourceIterator(''))
 		self.assertEqual(result, False)
 
+	def test_free_context_1(self):
+		text = """ // A comment
+		           property propName     = 'propValue';
+		           token tokenName       : 'constant'* andReference;
+		           fragment fragmentName : 'anotherConstant' ; """
+		
+		context = Context()
+		Parser().free_context(SourceIterator(text), context)
+		
+		expected = Context()
+		expected.properties['propName'] = 'propValue'
+		expected.rules['tokenName'] = RuleInfo(
+			'tokenName', RuleTypes.TOKEN,
+				GrammarExpressionList([
+					GrammarZeroOrMany(GrammarConstant('constant')),
+					GrammarReference('andReference')]))
+		expected.rules['fragmentName'] = RuleInfo(
+			'fragmentName', RuleTypes.FRAGMENT, GrammarConstant('anotherConstant'))
+
+		self.assertEqual(context, expected)
+
 class TestTokenRuleGrammarParser(unittest.TestCase):
 	def test_expect_token_grammar_constant_1(self):
 		result = Parser().expect_token_grammar(SourceIterator('\'var\''))
