@@ -8,6 +8,10 @@ languages.
 It's just a Python script, created for the Nova project. I didn't find any existing toolkit enough
 easy to install and use so I end up creating my own. It's still fun anyway.
 
+## Requirements
+
+The script requires Python 3.
+
 ## Development
 
 This project is in development, it doesn't even fulfill its goal, so don't use it. Yet.

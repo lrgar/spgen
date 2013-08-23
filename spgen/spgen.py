@@ -3,9 +3,7 @@
 #
 # Copyright (c) 2013 Luis Garcia.
 # This source file is subject to terms of the MIT License. (See accompanying file LICENSE)
-# 
-
-# Requires Python3
+#
 
 """Compiler generator script for C++."""
 

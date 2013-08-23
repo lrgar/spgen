@@ -5,8 +5,6 @@
 # This source file is subject to terms of the MIT License. (See accompanying file LICENSE)
 # 
 
-# Requires Python3
-
 import unittest
 from spgen_parser import *
 
