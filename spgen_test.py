@@ -8,7 +8,7 @@
 # Requires Python3
 
 import unittest
-from spgen import *
+from spgen_parser import *
 
 class TestParser(unittest.TestCase):
 	def test_eof_detection_1(self):
