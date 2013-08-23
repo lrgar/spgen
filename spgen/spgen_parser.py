@@ -8,6 +8,7 @@
 # TODO: support /* ... */ comments.
 
 import sys, copy, string
+from collections import OrderedDict
 
 class ParserException(Exception):
 	pass
@@ -100,7 +101,7 @@ class RuleInfo:
 class Context:
 	def __init__(self):
 		self._properties = {}
-		self._rules = {}
+		self._rules = OrderedDict()
 
 	def __repr__(self):
 		return '{} {}'.format(self.__class__.__name__, str(self.__dict__))
