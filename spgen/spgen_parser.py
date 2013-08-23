@@ -7,8 +7,6 @@
 
 # TODO: support /* ... */ comments.
 
-"""Compiler generator script for C++."""
-
 import sys, copy, string
 
 class ParserException(Exception):
