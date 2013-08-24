@@ -19,11 +19,11 @@ class LexerInput:
 
 	def __lt__(self, other):
 		if len(self._value) != len(other._value):
-			return len(self._value) > len(other._value)
-		return self._value > other._value
+			return len(self._value) < len(other._value)
+		return self._value < other._value
 
 	def any():
-		return LexerInput._generate('any')
+		return LexerInput._generate('any-value')
 
 	def any_digit():
 		return LexerInput._generate('any-digit')

@@ -658,16 +658,81 @@ class TestLexerGenerator(unittest.TestCase):
 
 		expected = create_dfa_graph(
 					moves = [
-						(0, 1, LexerInput.char('v')),
+						(0, 1, LexerInput.char('f')),
+						(0, 2, LexerInput.char('v')),
+						(1, 3, LexerInput.char('o')),
+						(2, 4, LexerInput.char('a')),
+						(3, 5, LexerInput.char('o')),
+						(4, 6, LexerInput.char('r')),
+						(6, 1, LexerInput.char('f')),
+						(6, 2, LexerInput.char('v'))],
+					accepting_states = [
+						(5, 't')])
+
+		self.assertEqual(result, expected)
+
+	def test_nfa_generation_6(self):
+		nfa_graph = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('f')),
+						(1, 2, LexerInput.char('o')),
+						(2, 3, LexerInput.char('o')),
+						(0, 4, LexerInput.char('b')),
+						(4, 5, LexerInput.char('a')),
+						(5, 6, LexerInput.char('r')),
+						(0, 6, LexerInput.default())],
+					accepting_states = [
+						(3, 't'),
+						(6, 's')])
+
+		result = DFAGraphGenerator().generate(nfa_graph)
+
+		expected = create_dfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('b')),
 						(0, 2, LexerInput.char('f')),
 						(1, 3, LexerInput.char('a')),
 						(2, 4, LexerInput.char('o')),
 						(3, 5, LexerInput.char('r')),
-						(5, 1, LexerInput.char('v')),
-						(5, 2, LexerInput.char('f')),
 						(4, 6, LexerInput.char('o'))],
 					accepting_states = [
-						(6, 't')])
+						(0, ['s']),
+						(5, ['s']),
+						(6, ['t'])])
+
+		self.assertEqual(result, expected)
+
+	def test_nfa_generation_7(self):
+		nfa_graph = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('f')),
+						(1, 2, LexerInput.char('o')),
+						(2, 3, LexerInput.char('o')),
+						(0, 4, LexerInput.char('f')),
+						(4, 5, LexerInput.char('o')),
+						(5, 6, LexerInput.char('o')),
+						(6, 7, LexerInput.char('b')),
+						(7, 8, LexerInput.char('a')),
+						(8, 9, LexerInput.char('r')),
+						(0, 9, LexerInput.default())],
+					accepting_states = [
+						(3, 't'),
+						(9, 's')])
+
+		result = DFAGraphGenerator().generate(nfa_graph)
+
+		expected = create_dfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('f')),
+						(1, 2, LexerInput.char('o')),
+						(2, 3, LexerInput.char('o')),
+						(3, 4, LexerInput.char('b')),
+						(4, 5, LexerInput.char('a')),
+						(5, 6, LexerInput.char('r'))],
+					accepting_states = [
+						(0, ['s']),
+						(3, ['t']),
+						(6, ['s'])])
 
 		self.assertEqual(result, expected)
 
