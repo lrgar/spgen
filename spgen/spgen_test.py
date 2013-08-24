@@ -400,5 +400,21 @@ class TestLexerGenerator(unittest.TestCase):
 
 		self.assertEqual(result, expected)
 
+	def test_nfa_generation_2(self):
+		context = Context()
+		context.rules['t'] = RuleInfo('t', RuleTypes.TOKEN, GrammarZeroOrOne(GrammarConstant('var')))
+		result = NFAGraphGenerator().generate(context)
+
+		expected = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('v')),
+						(1, 2, LexerInput.char('a')),
+						(2, 3, LexerInput.char('r')),
+						(0, 3, LexerInput.default())],
+					accepting_states = [
+						(3, 't')])
+		
+		self.assertEqual(result, expected)
+
 if __name__ == '__main__':
 	unittest.main()

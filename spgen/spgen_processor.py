@@ -13,6 +13,9 @@ class LexerInput:
 	def __init__(self, value):
 		self._value = value
 
+	def __repr__(self):
+		return self._value
+
 	def any():
 		return LexerInput._generate('any')
 
@@ -23,7 +26,7 @@ class LexerInput:
 		return LexerInput._generate('any-letter')
 
 	def char(char):
-		return LexerInput._generate(char)
+		return LexerInput._generate('\'' + char + '\'')
 
 	def default():
 		return LexerInput._generate('default')
@@ -42,14 +45,19 @@ class NFAGraph:
 			return '{0} {{ 0 states }} '.format(self.__class__.__name__)
 		else:
 			output = ', '.join([
-				'state {0} [emit \'{1}\']'.format(x.index, x.rule)
-				for x in self._states if x.rule is not None
+				'state {0} [emit \'{1}\']'.format(s.index, s.rule)
+				for s in self._states if s.rule is not None
 				])
 
-			if len(output) > 0:
-				return '{0} {{ {1} states: {2} }}'.format(self.__class__.__name__, len(self._states), output)
-			else:
-				return '{0} {{ {1} states }}'.format(self.__class__.__name__, len(self._states))
+			if len(output) > 0: output = ': {0}'.format(output)
+
+			moves = [(s.index, r[1].index, r[0]) for s in self._states for r in s.moves]
+			sorted(moves)
+
+			if len(moves) > 0:
+				output += '; ' + ', '.join(['({0}, {1}, {2})'.format(u, v, m) for u, v, m in moves])
+
+			return '{0} {{ {1} states{2} }}'.format(self.__class__.__name__, len(self._states), output)
 
 	def __eq__(self, other):
 		return self.__dict__ == other.__dict__
@@ -66,6 +74,7 @@ class NFAState:
 	def __init__(self):
 		self._index = None
 		self._rule = None
+		self._moves = []
 
 	def __repr__(self):
 		return '{0} {1}'.format(self.__class__.__name__, str(self.__dict__))
@@ -89,8 +98,16 @@ class NFAState:
 	def rule(self, value):
 		self._rule = value
 
+	@property
+	def moves(self):
+	    return self._moves
+
+	@moves.setter
+	def moves(self, value):
+	    self._moves = value
+
 	def consume(self, acceptor, state):
-		pass
+		self._moves.append((acceptor, state))
 
 class NFAGraphGenerator:
 	def generate(self, context):
