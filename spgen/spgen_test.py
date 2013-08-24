@@ -432,7 +432,7 @@ class TestLexerGenerator(unittest.TestCase):
 						(0, 1, LexerInput.char('v')),
 						(1, 2, LexerInput.char('a')),
 						(2, 3, LexerInput.char('r')),
-						(0, 3, LexerInput.default())],
+						(0, 3, LexerInput.DEFAULT)],
 					accepting_states = [
 						(3, 't')])
 
@@ -445,11 +445,11 @@ class TestLexerGenerator(unittest.TestCase):
 
 		expected = create_nfa_graph(
 					moves = [
-						(0, 1, LexerInput.default()),
+						(0, 1, LexerInput.DEFAULT),
 						(0, 2, LexerInput.char('v')),
 						(2, 3, LexerInput.char('a')),
 						(3, 4, LexerInput.char('r')),
-						(4, 0, LexerInput.default())],
+						(4, 0, LexerInput.DEFAULT)],
 					accepting_states = [
 						(1, 't')])
 		
@@ -465,11 +465,11 @@ class TestLexerGenerator(unittest.TestCase):
 						(0, 1, LexerInput.char('v')),
 						(1, 2, LexerInput.char('a')),
 						(2, 3, LexerInput.char('r')),
-						(3, 4, LexerInput.default()),
+						(3, 4, LexerInput.DEFAULT),
 						(3, 5, LexerInput.char('v')),
 						(5, 6, LexerInput.char('a')),
 						(6, 7, LexerInput.char('r')),
-						(7, 3, LexerInput.default())],
+						(7, 3, LexerInput.DEFAULT)],
 					accepting_states = [
 						(4, 't')])
 		
@@ -485,11 +485,11 @@ class TestLexerGenerator(unittest.TestCase):
 
 		expected = create_nfa_graph(
 					moves = [
-						(0, 1, LexerInput.default()),
+						(0, 1, LexerInput.DEFAULT),
 						(0, 2, LexerInput.char('v')),
 						(2, 3, LexerInput.char('a')),
 						(3, 4, LexerInput.char('r')),
-						(4, 0, LexerInput.default()),
+						(4, 0, LexerInput.DEFAULT),
 						(1, 5, LexerInput.char('f')),
 						(5, 6, LexerInput.char('o')),
 						(6, 7, LexerInput.char('o'))],
@@ -512,7 +512,7 @@ class TestLexerGenerator(unittest.TestCase):
 						(0, 4, LexerInput.char('b')),
 						(4, 5, LexerInput.char('a')),
 						(5, 6, LexerInput.char('r')),
-						(0, 6, LexerInput.default())],
+						(0, 6, LexerInput.DEFAULT)],
 					accepting_states = [
 						(3, 't'),
 						(6, 's')])
@@ -536,7 +536,7 @@ class TestLexerGenerator(unittest.TestCase):
 						(6, 7, LexerInput.char('b')),
 						(7, 8, LexerInput.char('a')),
 						(8, 9, LexerInput.char('r')),
-						(0, 9, LexerInput.default())],
+						(0, 9, LexerInput.DEFAULT)],
 					accepting_states = [
 						(3, 't'),
 						(9, 's')])
@@ -570,7 +570,7 @@ class TestLexerGenerator(unittest.TestCase):
 						(0, 1, LexerInput.char('v')),
 						(1, 2, LexerInput.char('a')),
 						(2, 3, LexerInput.char('r')),
-						(0, 3, LexerInput.default())],
+						(0, 3, LexerInput.DEFAULT)],
 					accepting_states = [
 						(3, 't')])
 
@@ -589,11 +589,11 @@ class TestLexerGenerator(unittest.TestCase):
 	def test_dfa_generation_3(self):
 		nfa_graph = create_nfa_graph(
 					moves = [
-						(0, 1, LexerInput.default()),
+						(0, 1, LexerInput.DEFAULT),
 						(0, 2, LexerInput.char('v')),
 						(2, 3, LexerInput.char('a')),
 						(3, 4, LexerInput.char('r')),
-						(4, 0, LexerInput.default())],
+						(4, 0, LexerInput.DEFAULT)],
 					accepting_states = [
 						(1, 't')])
 
@@ -616,11 +616,11 @@ class TestLexerGenerator(unittest.TestCase):
 						(0, 1, LexerInput.char('v')),
 						(1, 2, LexerInput.char('a')),
 						(2, 3, LexerInput.char('r')),
-						(3, 4, LexerInput.default()),
+						(3, 4, LexerInput.DEFAULT),
 						(3, 5, LexerInput.char('v')),
 						(5, 6, LexerInput.char('a')),
 						(6, 7, LexerInput.char('r')),
-						(7, 3, LexerInput.default())],
+						(7, 3, LexerInput.DEFAULT)],
 					accepting_states = [
 						(4, 't')])
 
@@ -643,11 +643,11 @@ class TestLexerGenerator(unittest.TestCase):
 	def test_dfa_generation_5(self):
 		nfa_graph = create_nfa_graph(
 					moves = [
-						(0, 1, LexerInput.default()),
+						(0, 1, LexerInput.DEFAULT),
 						(0, 2, LexerInput.char('v')),
 						(2, 3, LexerInput.char('a')),
 						(3, 4, LexerInput.char('r')),
-						(4, 0, LexerInput.default()),
+						(4, 0, LexerInput.DEFAULT),
 						(1, 5, LexerInput.char('f')),
 						(5, 6, LexerInput.char('o')),
 						(6, 7, LexerInput.char('o'))],
@@ -680,7 +680,7 @@ class TestLexerGenerator(unittest.TestCase):
 						(0, 4, LexerInput.char('b')),
 						(4, 5, LexerInput.char('a')),
 						(5, 6, LexerInput.char('r')),
-						(0, 6, LexerInput.default())],
+						(0, 6, LexerInput.DEFAULT)],
 					accepting_states = [
 						(3, 't'),
 						(6, 's')])
@@ -714,7 +714,7 @@ class TestLexerGenerator(unittest.TestCase):
 						(6, 7, LexerInput.char('b')),
 						(7, 8, LexerInput.char('a')),
 						(8, 9, LexerInput.char('r')),
-						(0, 9, LexerInput.default())],
+						(0, 9, LexerInput.DEFAULT)],
 					accepting_states = [
 						(3, 't'),
 						(9, 's')])

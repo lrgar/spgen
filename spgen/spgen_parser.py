@@ -74,6 +74,51 @@ class RuleTypes:
 	TOKEN = 2
 	FRAGMENT = 3
 
+class SpecialInput:
+	def __init__(self, value):
+		self._value = value
+
+	def __eq__(self, other):
+		return self._value == other._value
+
+SpecialInput.ANY = SpecialInput(1)
+SpecialInput.DIGIT = SpecialInput(2)
+SpecialInput.NON_DIGIT = SpecialInput(3)
+SpecialInput.LETTER = SpecialInput(4)
+SpecialInput.NON_LETTER = SpecialInput(5)
+SpecialInput.WHITESPACE = SpecialInput(6)
+SpecialInput.DEFAULT = SpecialInput(7)
+
+def recognize_input_scape(str_):
+	out = []
+
+	index = 0
+	while index < len(str_):
+		if str_[index] == '\\':
+			index = index + 1
+			special = {
+				'.'  : SpecialInput.ANY,
+				'd'  : SpecialInput.DIGIT,
+				'D'  : SpecialInput.NON_DIGIT,
+				'w'  : SpecialInput.LETTER,
+				'W'  : SpecialInput.NON_LETTER,
+				's'  : SpecialInput.WHITESPACE,
+				't'  : '\t',
+				'n'  : '\n',
+				'r'  : '\r',
+				'\'' : '\'',
+				'\\' : '\\' }
+
+			if str_[index] not in special:
+				raise ParserException('\'\\{0}\' token not recognized.'.format(str_[index]))
+			else:
+				out.append(special[str_[index]])
+		else:
+			out.append(str_[index])
+
+		index = index + 1
+	return out
+
 class RuleInfo:
 	def __init__(self, name, rule_type, grammar):
 		self._name = name

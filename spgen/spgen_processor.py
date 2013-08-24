@@ -22,25 +22,35 @@ class LexerInput:
 			return len(self._value) < len(other._value)
 		return self._value < other._value
 
-	def any():
-		return LexerInput._generate('any-value')
+	def input(value):
+		if isinstance(value, SpecialInput):
+			special = {
+				SpecialInput.ANY        : LexerInput.ANY,
+				SpecialInput.DIGIT      : LexerInput.DIGIT,
+				SpecialInput.NON_DIGIT  : LexerInput.NON_DIGIT,
+				SpecialInput.LETTER     : LexerInput.LETTER,
+				SpecialInput.NON_LETTER : LexerInput.NON_LETTER,
+				SpecialInput.WHITESPACE : LexerInput.WHITESPACE }
 
-	def any_digit():
-		return LexerInput._generate('any-digit')
-
-	def any_letter():
-		return LexerInput._generate('any-letter')
+			return special[value]
+		else:
+			return LexerInput.char(value)
 
 	def char(char):
 		return LexerInput._generate('\'' + char + '\'')
-
-	def default():
-		return LexerInput._generate('default')
 
 	def _generate(name):
 		if name not in LexerInput._BAG:
 			LexerInput._BAG[name] = LexerInput(name)
 		return LexerInput._BAG[name]
+
+LexerInput.ANY = LexerInput._generate('...any')
+LexerInput.DIGIT = LexerInput._generate('...digit')
+LexerInput.NON_DIGIT = LexerInput._generate('...non-digit')
+LexerInput.LETTER = LexerInput._generate('...letter')
+LexerInput.NON_LETTER = LexerInput._generate('...non-letter')
+LexerInput.WHITESPACE = LexerInput._generate('...whitespace')
+LexerInput.DEFAULT = LexerInput._generate('...default')
 
 class NFAGraph:
 	def __init__(self):
@@ -230,7 +240,7 @@ class NFAGraphGenerator:
 		if isinstance(grammar, GrammarConstant):
 			for char in grammar.value:
 				next_state = self.create_state(states)
-				current_state.consume(LexerInput.char(char), next_state)
+				current_state.consume(LexerInput.input(char), next_state)
 				current_state = next_state
 
 		elif isinstance(grammar, GrammarExpressionList):
@@ -239,14 +249,14 @@ class NFAGraphGenerator:
 
 		elif isinstance(grammar, GrammarZeroOrOne):
 			out_state = self.iterate(current_state, states, grammar.expression)
-			current_state.consume(LexerInput.default(), out_state)
+			current_state.consume(LexerInput.DEFAULT, out_state)
 			current_state = out_state
 
 		elif isinstance(grammar, GrammarZeroOrMany):
 			end_state = self.create_state(states)
 			out_state = self.iterate(current_state, states, grammar.expression)
-			out_state.consume(LexerInput.default(), current_state)
-			current_state.consume(LexerInput.default(), end_state)
+			out_state.consume(LexerInput.DEFAULT, current_state)
+			current_state.consume(LexerInput.DEFAULT, end_state)
 			current_state = end_state
 
 		elif isinstance(grammar, GrammarOneOrMany):
@@ -300,7 +310,7 @@ class DFAGraphGenerator:
 		queue = list(nfa_states)
 		index = 0
 		while index < len(queue):
-			for s in [t for i, t in queue[index].moves if i == LexerInput.default()]:
+			for s in [t for i, t in queue[index].moves if i == LexerInput.DEFAULT]:
 				if s not in visited:
 					queue.append(s)
 			index = index + 1
@@ -312,7 +322,7 @@ class DFAGraphGenerator:
 		return self.default_closure(closure)
 
 	def get_inputs(self, nfa_states):
-		return sorted(set([i for s in nfa_states for i, t in s.moves if i != LexerInput.default()]))
+		return sorted(set([i for s in nfa_states for i, t in s.moves if i != LexerInput.DEFAULT]))
 
 	def create_state(self, states):
 		state = DFAState()
