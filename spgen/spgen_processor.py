@@ -80,7 +80,19 @@ class NFAState:
 		return '{0} {1}'.format(self.__class__.__name__, str(self.__dict__))
 
 	def __eq__(self, other):
-		return self.__dict__ == other.__dict__
+		if self._index != other._index:
+			return False
+
+		if self._rule != other._rule:
+			return False
+
+		if set([(a, s.index) for a, s in self.moves]) != set([(a, s.index) for a, s in other.moves]):
+			return False
+
+		return True
+
+	def __hash__(self):
+		return self._index
 
 	@property
 	def index(self):
@@ -111,18 +123,13 @@ class NFAState:
 
 class NFAGraphGenerator:
 	def generate(self, context):
-		starting_state = NFAState()
-		states = [starting_state]
+		states = []
+		starting_state = self.create_state(states)
 
 		for key, rule in context.rules.items():
 			if rule.type == RuleTypes.TOKEN:
 				last_state = self.iterate(starting_state, states, rule.grammar)
 				last_state.rule = rule.name
-
-		index = 0
-		for state in states:
-			state.index = index
-			index = index + 1
 
 		nfa_graph = NFAGraph()
 		nfa_graph.states = states
@@ -162,6 +169,7 @@ class NFAGraphGenerator:
 
 	def create_state(self, states):
 		state = NFAState()
+		state.index = len(states)
 		states.append(state)
 		return state
 
