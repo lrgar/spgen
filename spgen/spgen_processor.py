@@ -7,6 +7,7 @@
 
 from spgen_parser import *
 from collections import deque
+import string
 
 class LexerInput:
 	_BAG = {}
@@ -18,8 +19,6 @@ class LexerInput:
 		return self._value
 
 	def __lt__(self, other):
-		if len(self._value) != len(other._value):
-			return len(self._value) < len(other._value)
 		return self._value < other._value
 
 	def input(value):
@@ -37,20 +36,75 @@ class LexerInput:
 			return LexerInput.char(value)
 
 	def char(char):
-		return LexerInput._generate('\'' + char + '\'')
+		return LexerInput._generate('Z' + char)
 
 	def _generate(name):
 		if name not in LexerInput._BAG:
 			LexerInput._BAG[name] = LexerInput(name)
 		return LexerInput._BAG[name]
 
-LexerInput.ANY = LexerInput._generate('...any')
-LexerInput.DIGIT = LexerInput._generate('...digit')
-LexerInput.NON_DIGIT = LexerInput._generate('...non-digit')
-LexerInput.LETTER = LexerInput._generate('...letter')
-LexerInput.NON_LETTER = LexerInput._generate('...non-letter')
-LexerInput.WHITESPACE = LexerInput._generate('...whitespace')
-LexerInput.DEFAULT = LexerInput._generate('...default')
+	def _is_char(self):
+		return self._value[0] == 'Z'
+
+	def _get_char(self):
+		return self._value[1]
+
+	def match(a, b):
+		# Note that this algorithm depends of the ordering of value of special tokens.
+
+		if b < a: return LexerInput.match(b, a)
+
+		if a == LexerInput.ANY:
+			return True
+
+		if a == LexerInput.DIGIT:
+			if b._is_char():
+				return LexerInput._is_digit(b._get_char())
+			elif b == LexerInput.NON_LETTER:
+				return True
+			return False
+
+		if a == LexerInput.NON_DIGIT:
+			if b._is_char():
+				return not LexerInput._is_digit(b._get_char())
+			return True
+
+		if a == LexerInput.LETTER:
+			if b._is_char():
+				return LexerInput._is_letter(b._get_char())
+			return False
+
+		if a == LexerInput.NON_LETTER:
+			if b._is_char():
+				return not LexerInput._is_letter(b._get_char())
+			return True
+
+		if a == LexerInput.WHITESPACE:
+			if b._is_char():
+				return LexerInput._is_whitespace(b._get_char())
+
+		if a._is_char() and b._is_char():
+			return a == b
+
+		# For comparing DEFAULT
+		raise NotImplementedError('Input comparison not implemented.')
+
+	def _is_digit(char):
+		return char in string.digits
+
+	def _is_letter(char):
+		return char in string.ascii_letters
+
+	def _is_whitespace(char):
+		return char in string.whitespace
+
+LexerInput.DEFAULT = LexerInput._generate('A00default')
+LexerInput.ANY = LexerInput._generate('A01any')
+LexerInput.DIGIT = LexerInput._generate('A02digit')
+LexerInput.NON_DIGIT = LexerInput._generate('A03non-digit')
+LexerInput.LETTER = LexerInput._generate('A04letter')
+LexerInput.NON_LETTER = LexerInput._generate('A05non-letter')
+LexerInput.WHITESPACE = LexerInput._generate('A06whitespace')
 
 class NFAGraph:
 	def __init__(self):
@@ -318,7 +372,7 @@ class DFAGraphGenerator:
 		return queue
 
 	def input_closure(self, nfa_states, input_):
-		closure = [t for s in nfa_states for i, t in s.moves if i == input_]
+		closure = [t for s in nfa_states for i, t in s.moves if i != LexerInput.DEFAULT and LexerInput.match(i, input_)]
 		return self.default_closure(closure)
 
 	def get_inputs(self, nfa_states):

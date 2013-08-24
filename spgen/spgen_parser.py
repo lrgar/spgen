@@ -87,7 +87,6 @@ SpecialInput.NON_DIGIT = SpecialInput(3)
 SpecialInput.LETTER = SpecialInput(4)
 SpecialInput.NON_LETTER = SpecialInput(5)
 SpecialInput.WHITESPACE = SpecialInput(6)
-SpecialInput.DEFAULT = SpecialInput(7)
 
 def recognize_input_scape(str_):
 	out = []

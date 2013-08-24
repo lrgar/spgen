@@ -362,6 +362,34 @@ class TestTokenRuleGrammarParser(unittest.TestCase):
 		result = Parser().expect_token_grammar(SourceIterator('()*'))
 		self.assertEqual(result, None)
 
+	def test_special_input_recognition_1(self):
+		result = recognize_input_scape('abc')
+		self.assertEqual(result, ['a', 'b', 'c'])
+
+	def test_special_input_recognition_2(self):
+		result = recognize_input_scape('a\\tc')
+		self.assertEqual(result, ['a', '\t', 'c'])
+
+	def test_special_input_recognition_3(self):
+		result = recognize_input_scape('a\\t\\\\\\n\\rc')
+		self.assertEqual(result, ['a', '\t', '\\', '\n', '\r', 'c'])
+
+	def test_special_input_recognition_4(self):
+		result = recognize_input_scape('a\\wc')
+		self.assertEqual(result, ['a', SpecialInput.LETTER, 'c'])
+
+	def test_special_input_recognition_5(self):
+		result = recognize_input_scape('a\\w\\.\\d\\D\\W\\sc')
+		self.assertEqual(result, [
+			'a',
+			SpecialInput.LETTER,
+			SpecialInput.ANY,
+			SpecialInput.DIGIT,
+			SpecialInput.NON_DIGIT,
+			SpecialInput.NON_LETTER,
+			SpecialInput.WHITESPACE,
+			'c'])
+
 def create_nfa_graph(moves, accepting_states):
 	states = {}
 
@@ -735,6 +763,87 @@ class TestLexerGenerator(unittest.TestCase):
 						(6, ['s'])])
 
 		self.assertEqual(result, expected)
+
+	def test_input_matching_1(self):
+		result = LexerInput.match(LexerInput.ANY, LexerInput.char('a'))
+		self.assertEqual(result, True)
+
+	def test_input_matching_2(self):
+		result = LexerInput.match(LexerInput.ANY, LexerInput.WHITESPACE)
+		self.assertEqual(result, True)
+
+	def test_input_matching_3(self):
+		result = LexerInput.match(LexerInput.DIGIT, LexerInput.ANY)
+		self.assertEqual(result, True)
+
+	def test_input_matching_4(self):
+		result = LexerInput.match(LexerInput.ANY, LexerInput.NON_DIGIT)
+		self.assertEqual(result, True)
+
+	def test_input_matching_5(self):
+		result = LexerInput.match(LexerInput.LETTER, LexerInput.ANY)
+		self.assertEqual(result, True)
+
+	def test_input_matching_6(self):
+		result = LexerInput.match(LexerInput.LETTER, LexerInput.char('a'))
+		self.assertEqual(result, True)
+
+	def test_input_matching_7(self):
+		result = LexerInput.match(LexerInput.LETTER, LexerInput.WHITESPACE)
+		self.assertEqual(result, False)
+
+	def test_input_matching_8(self):
+		result = LexerInput.match(LexerInput.WHITESPACE, LexerInput.LETTER)
+		self.assertEqual(result, False)
+
+	def test_input_matching_9(self):
+		result = LexerInput.match(LexerInput.char('A'), LexerInput.LETTER)
+		self.assertEqual(result, True)
+
+	def test_input_matching_10(self):
+		result = LexerInput.match(LexerInput.NON_DIGIT, LexerInput.LETTER)
+		self.assertEqual(result, True)
+
+	def test_input_matching_11(self):
+		result = LexerInput.match(LexerInput.NON_DIGIT, LexerInput.NON_LETTER)
+		self.assertEqual(result, True)
+
+	def test_input_matching_12(self):
+		result = LexerInput.match(LexerInput.LETTER, LexerInput.DIGIT)
+		self.assertEqual(result, False)
+
+	def test_input_matching_13(self):
+		result = LexerInput.match(LexerInput.char('a'), LexerInput.DIGIT)
+		self.assertEqual(result, False)
+
+	def test_input_matching_14(self):
+		result = LexerInput.match(LexerInput.char('8'), LexerInput.DIGIT)
+		self.assertEqual(result, True)
+
+	def test_input_matching_15(self):
+		result = LexerInput.match(LexerInput.NON_DIGIT, LexerInput.char('a'))
+		self.assertEqual(result, True)
+
+	def test_input_matching_16(self):
+		result = LexerInput.match(LexerInput.NON_DIGIT, LexerInput.char('8'))
+		self.assertEqual(result, False)
+
+	def test_input_matching_17(self):
+		result = LexerInput.match(LexerInput.char(' '), LexerInput.WHITESPACE)
+		self.assertEqual(result, True)
+
+	def test_input_matching_18(self):
+		self.assertRaises(NotImplementedError, LexerInput.match, LexerInput.DEFAULT, LexerInput.DEFAULT)
+
+	def test_input_matching_19(self):
+		self.assertRaises(NotImplementedError, LexerInput.match, LexerInput.DEFAULT, LexerInput.WHITESPACE)
+
+	def test_input_matching_20(self):
+		self.assertRaises(NotImplementedError, LexerInput.match, LexerInput.char('A'), LexerInput.DEFAULT)
+
+	def test_input_matching_21(self):
+		result = LexerInput.match(LexerInput.DIGIT, LexerInput.NON_LETTER)
+		self.assertEqual(result, True)
 
 if __name__ == '__main__':
 	unittest.main()
