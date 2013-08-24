@@ -476,5 +476,50 @@ class TestLexerGenerator(unittest.TestCase):
 		
 		self.assertEqual(result, expected)
 
+	def test_nfa_generation_5(self):
+		context = Context()
+		context.rules['t'] = RuleInfo('t', RuleTypes.TOKEN, GrammarConstant('foo'))
+		context.rules['s'] = RuleInfo('s', RuleTypes.TOKEN, GrammarZeroOrOne(GrammarConstant('bar')))
+		result = NFAGraphGenerator().generate(context)
+
+		expected = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('f')),
+						(1, 2, LexerInput.char('o')),
+						(2, 3, LexerInput.char('o')),
+						(0, 4, LexerInput.char('b')),
+						(4, 5, LexerInput.char('a')),
+						(5, 6, LexerInput.char('r')),
+						(0, 6, LexerInput.default())],
+					accepting_states = [
+						(3, 't'),
+						(6, 's')])
+
+		self.assertEqual(result, expected)
+
+	def test_nfa_generation_6(self):
+		context = Context()
+		context.rules['t'] = RuleInfo('t', RuleTypes.TOKEN, GrammarConstant('foo'))
+		context.rules['s'] = RuleInfo('s', RuleTypes.TOKEN, GrammarZeroOrOne(GrammarConstant('foobar')))
+		result = NFAGraphGenerator().generate(context)
+
+		expected = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('f')),
+						(1, 2, LexerInput.char('o')),
+						(2, 3, LexerInput.char('o')),
+						(0, 4, LexerInput.char('f')),
+						(4, 5, LexerInput.char('o')),
+						(5, 6, LexerInput.char('o')),
+						(6, 7, LexerInput.char('b')),
+						(7, 8, LexerInput.char('a')),
+						(8, 9, LexerInput.char('r')),
+						(0, 9, LexerInput.default())],
+					accepting_states = [
+						(3, 't'),
+						(9, 's')])
+
+		self.assertEqual(result, expected)
+
 if __name__ == '__main__':
 	unittest.main()
