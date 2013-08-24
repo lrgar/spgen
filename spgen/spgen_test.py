@@ -384,6 +384,28 @@ def create_nfa_graph(moves, accepting_states):
 	graph.states = list(states.values())
 	return graph
 
+def create_dfa_graph(moves, accepting_states):
+	states = {}
+
+	for u, v, i in moves:
+		if u not in states:
+			states[u] = DFAState()
+			states[u].index = u
+		if v not in states:
+			states[v] = DFAState()
+			states[v].index = v
+		states[u].consume(i, states[v])
+
+	for u, r in accepting_states:
+		if u not in states:
+			states[u] = DFAState()
+			states[u].index = u
+		states[u].rules = r
+
+	graph = DFAGraph()
+	graph.states = list(states.values())
+	return graph
+
 class TestLexerGenerator(unittest.TestCase):
 	def test_nfa_generation_1(self):
 		context = Context()
@@ -416,7 +438,7 @@ class TestLexerGenerator(unittest.TestCase):
 
 		self.assertEqual(result, expected)
 
-	def test_nfa_generation_2(self):
+	def test_nfa_generation_3(self):
 		context = Context()
 		context.rules['t'] = RuleInfo('t', RuleTypes.TOKEN, GrammarZeroOrMany(GrammarConstant('var')))
 		result = NFAGraphGenerator().generate(context)
@@ -433,7 +455,7 @@ class TestLexerGenerator(unittest.TestCase):
 		
 		self.assertEqual(result, expected)
 
-	def test_nfa_generation_3(self):
+	def test_nfa_generation_4(self):
 		context = Context()
 		context.rules['t'] = RuleInfo('t', RuleTypes.TOKEN, GrammarOneOrMany(GrammarConstant('var')))
 		result = NFAGraphGenerator().generate(context)
@@ -453,7 +475,7 @@ class TestLexerGenerator(unittest.TestCase):
 		
 		self.assertEqual(result, expected)
 
-	def test_nfa_generation_4(self):
+	def test_nfa_generation_5(self):
 		context = Context()
 		context.rules['t'] = RuleInfo('t', RuleTypes.TOKEN,
 			GrammarExpressionList([
@@ -476,7 +498,7 @@ class TestLexerGenerator(unittest.TestCase):
 		
 		self.assertEqual(result, expected)
 
-	def test_nfa_generation_5(self):
+	def test_nfa_generation_6(self):
 		context = Context()
 		context.rules['t'] = RuleInfo('t', RuleTypes.TOKEN, GrammarConstant('foo'))
 		context.rules['s'] = RuleInfo('s', RuleTypes.TOKEN, GrammarZeroOrOne(GrammarConstant('bar')))
@@ -497,7 +519,7 @@ class TestLexerGenerator(unittest.TestCase):
 
 		self.assertEqual(result, expected)
 
-	def test_nfa_generation_6(self):
+	def test_nfa_generation_7(self):
 		context = Context()
 		context.rules['t'] = RuleInfo('t', RuleTypes.TOKEN, GrammarConstant('foo'))
 		context.rules['s'] = RuleInfo('s', RuleTypes.TOKEN, GrammarZeroOrOne(GrammarConstant('foobar')))
@@ -518,6 +540,134 @@ class TestLexerGenerator(unittest.TestCase):
 					accepting_states = [
 						(3, 't'),
 						(9, 's')])
+
+		self.assertEqual(result, expected)
+
+	def test_dfa_generation_1(self):
+		nfa_graph = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('v')),
+						(1, 2, LexerInput.char('a')),
+						(2, 3, LexerInput.char('r'))],
+					accepting_states = [
+						(3, 'var')])
+
+		result = DFAGraphGenerator().generate(nfa_graph)
+
+		expected = create_dfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('v')),
+						(1, 2, LexerInput.char('a')),
+						(2, 3, LexerInput.char('r'))],
+					accepting_states = [
+						(3, ['var'])])
+
+		self.assertEqual(result, expected)
+
+	def test_dfa_generation_2(self):
+		nfa_graph = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('v')),
+						(1, 2, LexerInput.char('a')),
+						(2, 3, LexerInput.char('r')),
+						(0, 3, LexerInput.default())],
+					accepting_states = [
+						(3, 't')])
+
+		result = DFAGraphGenerator().generate(nfa_graph)
+
+		expected = create_dfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('v')),
+						(1, 2, LexerInput.char('a')),
+						(2, 3, LexerInput.char('r'))],
+					accepting_states = [
+						(0, ['t']), (3, ['t'])])
+
+		self.assertEqual(result, expected)
+
+	def test_dfa_generation_3(self):
+		nfa_graph = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.default()),
+						(0, 2, LexerInput.char('v')),
+						(2, 3, LexerInput.char('a')),
+						(3, 4, LexerInput.char('r')),
+						(4, 0, LexerInput.default())],
+					accepting_states = [
+						(1, 't')])
+
+		result = DFAGraphGenerator().generate(nfa_graph)
+
+		expected = create_dfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('v')),
+						(1, 2, LexerInput.char('a')),
+						(2, 3, LexerInput.char('r')),
+						(3, 1, LexerInput.char('v'))],
+					accepting_states = [
+						(0, ['t']), (3, ['t'])])
+
+		self.assertEqual(result, expected)
+
+	def test_dfa_generation_4(self):
+		nfa_graph = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('v')),
+						(1, 2, LexerInput.char('a')),
+						(2, 3, LexerInput.char('r')),
+						(3, 4, LexerInput.default()),
+						(3, 5, LexerInput.char('v')),
+						(5, 6, LexerInput.char('a')),
+						(6, 7, LexerInput.char('r')),
+						(7, 3, LexerInput.default())],
+					accepting_states = [
+						(4, 't')])
+
+		result = DFAGraphGenerator().generate(nfa_graph)
+
+		expected = create_dfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('v')),
+						(1, 2, LexerInput.char('a')),
+						(2, 3, LexerInput.char('r')),
+						(3, 4, LexerInput.char('v')),
+						(4, 5, LexerInput.char('a')),
+						(5, 6, LexerInput.char('r')),
+						(6, 4, LexerInput.char('v'))],
+					accepting_states = [
+						(3, ['t']), (6, ['t'])])
+
+		self.assertEqual(result, expected)
+
+	def test_dfa_generation_5(self):
+		nfa_graph = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.default()),
+						(0, 2, LexerInput.char('v')),
+						(2, 3, LexerInput.char('a')),
+						(3, 4, LexerInput.char('r')),
+						(4, 0, LexerInput.default()),
+						(1, 5, LexerInput.char('f')),
+						(5, 6, LexerInput.char('o')),
+						(6, 7, LexerInput.char('o'))],
+					accepting_states = [
+						(7, 't')])
+
+		result = DFAGraphGenerator().generate(nfa_graph)
+
+		expected = create_dfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('v')),
+						(0, 2, LexerInput.char('f')),
+						(1, 3, LexerInput.char('a')),
+						(2, 4, LexerInput.char('o')),
+						(3, 5, LexerInput.char('r')),
+						(5, 1, LexerInput.char('v')),
+						(5, 2, LexerInput.char('f')),
+						(4, 6, LexerInput.char('o'))],
+					accepting_states = [
+						(6, 't')])
 
 		self.assertEqual(result, expected)
 
