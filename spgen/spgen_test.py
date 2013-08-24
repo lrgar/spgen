@@ -7,6 +7,7 @@
 
 import unittest
 from spgen_parser import *
+from spgen_processor import *
 
 class TestParser(unittest.TestCase):
 	def test_eof_detection_1(self):
@@ -360,6 +361,44 @@ class TestTokenRuleGrammarParser(unittest.TestCase):
 	def test_expect_token_grammar_expression_13(self):
 		result = Parser().expect_token_grammar(SourceIterator('()*'))
 		self.assertEqual(result, None)
+
+def create_nfa_graph(moves, accepting_states):
+	states = {}
+
+	for u, v, i in moves:
+		if u not in states:
+			states[u] = NFAState()
+			states[u].index = u
+		if v not in states:
+			states[v] = NFAState()
+			states[v].index = v
+		states[u].consume(i, states[v])
+
+	for u, r in accepting_states:
+		if u not in states:
+			states[u] = NFAState()
+			states[u].index = u
+		states[u].rule = r
+
+	graph = NFAGraph()
+	graph.states = list(states.values())
+	return graph
+
+class TestLexerGenerator(unittest.TestCase):
+	def test_nfa_generation_1(self):
+		context = Context()
+		context.rules['var'] = RuleInfo('var', RuleTypes.TOKEN, GrammarConstant('var'))
+		result = NFAGraphGenerator().generate(context)
+
+		expected = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('v')),
+						(1, 2, LexerInput.char('a')),
+						(2, 3, LexerInput.char('r'))],
+					accepting_states = [
+						(3, 'var')])
+
+		self.assertEqual(result, expected)
 
 if __name__ == '__main__':
 	unittest.main()
