@@ -319,9 +319,3 @@ class DFAGraphGenerator:
 		state.index = len(states)
 		states.append(state)
 		return state
-
-class LexerGraphGenerator:
-	def generate(self, context, lexer_info):
-		nfa_generator = NFAGraphGenerator()
-		nfa_graph = nfa_generator.generate(context)
-

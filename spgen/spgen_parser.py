@@ -197,14 +197,6 @@ class GrammarExpressionList(GrammarExpression):
 	def list(self):
 		return self._list
 
-class GrammarCharacterRange(GrammarExpression):
-	def __init__(self, range_):
-		self._range = range_
-
-	@property
-	def range(self):
-		return self._range
-
 class GrammarReference(GrammarExpression):
 	def __init__(self, identifier):
 		self._identifier = identifier
