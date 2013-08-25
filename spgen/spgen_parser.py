@@ -10,7 +10,7 @@
 import sys, copy, string
 from collections import OrderedDict
 
-class ParserException(Exception):
+class ParserError(Exception):
 	pass
 
 class PropertyInfo:
@@ -109,7 +109,7 @@ def recognize_input_scape(str_):
 				'\\' : '\\' }
 
 			if str_[index] not in special:
-				raise ParserException('\'\\{0}\' token not recognized.'.format(str_[index]))
+				raise ParserError('\'\\{0}\' token not recognized.'.format(str_[index]))
 			else:
 				out.append(special[str_[index]])
 		else:
@@ -306,7 +306,7 @@ class Parser:
 				context.rules[fragment_info.name] = RuleInfo(fragment_info.name, RuleTypes.FRAGMENT, fragment_info.grammar)
 				continue
 
-			raise ParserException(
+			raise ParserError(
 				'Unknown token at line: {0}, column {1}.'.format(
 					source_iterator.current_line,
 					source_iterator.current_column))
