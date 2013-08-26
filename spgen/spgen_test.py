@@ -202,6 +202,26 @@ class TestParser(unittest.TestCase):
 		result, token_info = Parser().try_token(SourceIterator('token á家ل : \'a\' ;'))
 		self.assertEqual(result, True)
 
+	def test_token_detection_13(self):
+		result, token_info = Parser().try_token(SourceIterator('token t : a | b ;'))
+		self.assertEqual(result, True)
+
+	def test_token_detection_14(self):
+		result, token_info = Parser().try_token(SourceIterator('token t : a | b | c ;'))
+		self.assertEqual(result, True)
+
+	def test_token_detection_15(self):
+		result, token_info = Parser().try_token(SourceIterator('token t : a | (b* | c ;'))
+		self.assertEqual(result, False)
+
+	def test_token_detection_16(self):
+		result, token_info = Parser().try_token(SourceIterator('token t : a | b | ;'))
+		self.assertEqual(result, False)
+
+	def test_token_detection_17(self):
+		result, token_info = Parser().try_token(SourceIterator('token t : ()* | b ;'))
+		self.assertEqual(result, False)
+
 	def test_fragment_detection_1(self):
 		result, fragment_info = Parser().try_fragment(SourceIterator('fragment var : \'var\';'))
 		self.assertEqual(result, True)
@@ -365,6 +385,35 @@ class TestTokenRuleGrammarParser(unittest.TestCase):
 	def test_expect_token_grammar_expression_13(self):
 		result = Parser().expect_token_grammar(SourceIterator('()*'))
 		self.assertEqual(result, None)
+
+	def test_expect_token_grammar_expression_14(self):
+		result = Parser().expect_token_grammar(SourceIterator('a | b'))
+		expected = GrammarOrExpressionList([GrammarReference('a'), GrammarReference('b')])
+		self.assertEqual(result, expected)
+
+	def test_expect_token_grammar_expression_15(self):
+		result = Parser().expect_token_grammar(SourceIterator('a* | b?'))
+		expected = GrammarOrExpressionList([
+			GrammarZeroOrMany(GrammarReference('a')),
+			GrammarZeroOrOne(GrammarReference('b')) ])
+		self.assertEqual(result, expected)
+
+	def test_expect_token_grammar_expression_16(self):
+		result = Parser().expect_token_grammar(SourceIterator('(a* | b?) | c'))
+		expected = GrammarOrExpressionList([
+			GrammarOrExpressionList([
+				GrammarZeroOrMany(GrammarReference('a')),
+				GrammarZeroOrOne(GrammarReference('b')) ]),
+			GrammarReference('c') ])
+		self.assertEqual(result, expected)
+
+	def test_expect_token_grammar_expression_16(self):
+		result = Parser().expect_token_grammar(SourceIterator('a* | b? | \'c\''))
+		expected = GrammarOrExpressionList([
+			GrammarZeroOrMany(GrammarReference('a')),
+			GrammarZeroOrOne(GrammarReference('b')),
+			GrammarConstant('c') ])
+		self.assertEqual(result, expected)
 
 	def test_special_input_recognition_1(self):
 		result = recognize_input_scape('abc')
@@ -598,6 +647,50 @@ class TestLexerGenerator(unittest.TestCase):
 
 		self.assertEqual(result, expected)
 
+	def test_nfa_generation_8(self):
+		context = Context()
+		context.rules['t'] = RuleInfo('t', RuleTypes.TOKEN,
+			GrammarOrExpressionList([
+				GrammarZeroOrMany(GrammarConstant('var')),
+				GrammarConstant('foo')]))
+		result = NFAGraphGenerator().generate(context)
+
+		expected = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.DEFAULT),
+						(1, 3, LexerInput.DEFAULT),
+						(1, 8, LexerInput.DEFAULT),
+						(3, 4, LexerInput.DEFAULT),
+						(3, 5, LexerInput.char('v')),
+						(5, 6, LexerInput.char('a')),
+						(6, 7, LexerInput.char('r')),
+						(7, 3, LexerInput.DEFAULT),
+						(4, 2, LexerInput.DEFAULT),
+						(8, 9, LexerInput.char('f')),
+						(9, 10, LexerInput.char('o')),
+						(10, 11, LexerInput.char('o')),
+						(11, 2, LexerInput.DEFAULT)],
+					accepting_states = [
+						(2, 't')])
+		
+		self.assertEqual(result, expected)
+
+	def test_nfa_generation_9(self):
+		context = Context()
+		context.rules['t'] = RuleInfo('t', RuleTypes.TOKEN, GrammarZeroOrOne(GrammarReference('s')))
+		context.rules['s'] = RuleInfo('s', RuleTypes.FRAGMENT, GrammarConstant('var'))
+		result = NFAGraphGenerator().generate(context)
+
+		expected = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.DEFAULT),
+						(1, 2, LexerInput.char('v')),
+						(2, 3, LexerInput.char('a')),
+						(3, 4, LexerInput.char('r')),
+						(1, 4, LexerInput.DEFAULT)],
+					accepting_states = [
+						(4, 't')])
+
 	def test_dfa_generation_1(self):
 		nfa_graph = create_nfa_graph(
 					moves = [
@@ -791,6 +884,43 @@ class TestLexerGenerator(unittest.TestCase):
 
 		self.assertEqual(result, expected)
 
+	def test_nfa_generation_8(self):
+		nfa_graph = create_nfa_graph(
+					moves = [
+						(0, 1, LexerInput.DEFAULT),
+						(1, 3, LexerInput.DEFAULT),
+						(1, 8, LexerInput.DEFAULT),
+						(3, 4, LexerInput.DEFAULT),
+						(3, 5, LexerInput.char('v')),
+						(5, 6, LexerInput.char('a')),
+						(6, 7, LexerInput.char('r')),
+						(7, 3, LexerInput.DEFAULT),
+						(4, 2, LexerInput.DEFAULT),
+						(8, 9, LexerInput.char('f')),
+						(9, 10, LexerInput.char('o')),
+						(10, 11, LexerInput.char('o')),
+						(11, 2, LexerInput.DEFAULT)],
+					accepting_states = [
+						(2, 't')])
+
+		result = DFAGraphGenerator().generate(nfa_graph)
+
+		expected = create_dfa_graph(
+					moves = [
+						(0, 1, LexerInput.char('f')),
+						(0, 2, LexerInput.char('v')),
+						(1, 3, LexerInput.char('o')),
+						(2, 4, LexerInput.char('a')),
+						(3, 5, LexerInput.char('o')),
+						(4, 6, LexerInput.char('r')),
+						(6, 2, LexerInput.char('v'))],
+					accepting_states = [
+						(0, ['t']),
+						(5, ['t']),
+						(6, ['t'])])
+
+		self.assertEqual(result, expected)
+
 	def test_input_matching_1(self):
 		result = LexerInput.match(LexerInput.ANY, LexerInput.char('a'))
 		self.assertEqual(result, True)
@@ -963,6 +1093,50 @@ class TestLexerGenerator(unittest.TestCase):
 	def test_table_traverser_17(self):
 		grammar = """ token a : 'abc'; """
 		self.assertRaises(LexerError, match_grammar, grammar, 'abcde')
+
+	def test_table_traverser_18(self):
+		grammar = """ token a : 'abc' | 'cba'; """
+		result = match_grammar(grammar, 'abccba')
+		self.assertEqual(result, [(0, 3, 'a'), (3, 3, 'a')])
+
+	def test_table_traverser_19(self):
+		grammar = """ token a : ('abc'* | 'cba') 'd'; """
+		result = match_grammar(grammar, 'abcabcabcd')
+		self.assertEqual(result, [(0, 10, 'a')])
+
+	def test_table_traverser_20(self):
+		grammar = """ token a : ('abc' | 'cba')*; """
+		result = match_grammar(grammar, 'abccbaabc')
+		self.assertEqual(result, [(0, 9, 'a')])
+
+	def test_table_traverser_21(self):
+		grammar = """ token b : 'abccba' ; """
+		result = match_grammar(grammar, 'abccbaabccba')
+		self.assertEqual(result, [(0, 6, 'b'), (6, 6, 'b')])
+
+	def test_table_traverser_22(self):
+		grammar = """ token a : ('abc' | 'cba')* ; """
+		result = match_grammar(grammar, 'abccbaabccba')
+		self.assertEqual(result, [(0, 12, 'a')])
+
+	def test_table_traverser_23(self):
+		grammar = """ token a : ('abc' | 'cba')* ;
+		              token b : 'abccba' ; """
+		result = match_grammar(grammar, 'abccbaabccba')
+		self.assertEqual(result, [(0, 12, 'a')])
+
+	def test_table_traverser_24(self):
+		grammar = """ token a : ('abc' | 'cba')* ;
+		              token b : 'abccba' ; """
+		result = match_grammar(grammar, 'abccba')
+		self.assertEqual(result, [(0, 6, 'a'), (0, 6, 'b')])
+
+	def test_table_traverser_25(self):
+		grammar = """ token a      : (abc | 'cba')* ;
+		              token b      : 'abccba' ;
+		              fragment abc : 'abc' ; """
+		result = match_grammar(grammar, 'abccba')
+		self.assertEqual(result, [(0, 6, 'a'), (0, 6, 'b')])
 
 if __name__ == '__main__':
 	unittest.main()
