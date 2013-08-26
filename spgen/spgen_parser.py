@@ -282,9 +282,17 @@ class GrammarZeroOrOne(GrammarExpression):
 	def expression(self):
 		return self._expression
 
+class GrammarOrExpressionList(GrammarExpression):
+	def __init__(self, list_):
+		self._list = list_
+
+	@property
+	def list(self):
+		return self._list
+
 class Parser:
 	def process_file(self, file_path, context):
-		with open(input_file_path, 'r') as input_file:
+		with open(file_path, 'r') as input_file:
 			contents = input_file.read()
 			self.process_text(contents, context)
 
@@ -316,9 +324,18 @@ class Parser:
 				continue
 
 			raise ParserError(
-				'Unknown token at line: {0}, column {1}.'.format(
+				'Unknown token \'{0}\' at line: {1}, column {2}.'.format(
+					Parser._get_readable(source_iterator.current_item),
 					source_iterator.current_line,
 					source_iterator.current_column))
+
+	def _get_readable(char):
+		if char == '\n':
+			return '\\n'
+		elif char == '\r':
+			return '\\r'
+		elif char == '\t':
+			return '\\t'
 
 	def try_eof(self, source_iterator):
 		source_iterator.backup()
@@ -448,7 +465,32 @@ class Parser:
 		return None
 
 	def expect_token_grammar(self, source_iterator):
-		return self.expect_token_grammar_list(source_iterator)
+		return self.expect_token_grammar_or_list(source_iterator)
+
+	def expect_token_grammar_or_list(self, source_iterator):
+		source_iterator.backup()
+
+		elements = [];
+		while True:
+			expression = self.expect_token_grammar_list(source_iterator)
+			if expression is None:
+				source_iterator.restore()
+				return None
+
+			elements.append(expression)
+
+			if not self.expect_token(source_iterator, '|', alphanumeric_token = False):
+				break
+
+		if len(elements) == 0:
+			source_iterator.restore()
+			return None
+		elif len(elements) == 1:
+			source_iterator.release()
+			return elements[0]
+		else:
+			source_iterator.release()
+			return GrammarOrExpressionList(elements)
 
 	def expect_token_grammar_list(self, source_iterator):
 		source_iterator.backup()
@@ -507,7 +549,7 @@ class Parser:
 			return GrammarConstant(recognize_input_scape(result))
 
 		if self.expect_token(source_iterator, '(', alphanumeric_token = False):
-			result = self.expect_token_grammar_list(source_iterator)
+			result = self.expect_token_grammar_or_list(source_iterator)
 			if result is not None:
 				if self.expect_token(source_iterator, ')', alphanumeric_token = False):
 					return result

@@ -292,14 +292,14 @@ class NFAGraphGenerator:
 			if rule.type == RuleTypes.TOKEN:
 				rule_start_state = self.create_state(states)
 				start_state.consume(LexerInput.DEFAULT, rule_start_state)
-				last_state = self.iterate(rule_start_state, states, rule.grammar)
+				last_state = self.iterate(rule_start_state, states, rule.grammar, context.rules)
 				last_state.rule = rule.name
 
 		nfa_graph = NFAGraph()
 		nfa_graph.states = states
 		return nfa_graph
 
-	def iterate(self, current_state, states, grammar):
+	def iterate(self, current_state, states, grammar, rules):
 		if isinstance(grammar, GrammarConstant):
 			for char in grammar.value:
 				next_state = self.create_state(states)
@@ -308,16 +308,16 @@ class NFAGraphGenerator:
 
 		elif isinstance(grammar, GrammarExpressionList):
 			for expr in grammar.list:
-				current_state = self.iterate(current_state, states, expr)
+				current_state = self.iterate(current_state, states, expr, rules)
 
 		elif isinstance(grammar, GrammarZeroOrOne):
-			out_state = self.iterate(current_state, states, grammar.expression)
+			out_state = self.iterate(current_state, states, grammar.expression, rules)
 			current_state.consume(LexerInput.DEFAULT, out_state)
 			current_state = out_state
 
 		elif isinstance(grammar, GrammarZeroOrMany):
 			end_state = self.create_state(states)
-			out_state = self.iterate(current_state, states, grammar.expression)
+			out_state = self.iterate(current_state, states, grammar.expression, rules)
 			out_state.consume(LexerInput.DEFAULT, current_state)
 			current_state.consume(LexerInput.DEFAULT, end_state)
 			current_state = end_state
@@ -327,10 +327,22 @@ class NFAGraphGenerator:
 				GrammarExpressionList([
 					grammar.expression,
 					GrammarZeroOrMany(grammar.expression)
-				]))
+				]), rules)
+
+		elif isinstance(grammar, GrammarOrExpressionList):
+			end_state = self.create_state(states)
+			for expr in grammar.list:
+				start_subrule_state = self.create_state(states)
+				current_state.consume(LexerInput.DEFAULT, start_subrule_state)
+				end_subrule_state = self.iterate(start_subrule_state, states, expr, rules)
+				end_subrule_state.consume(LexerInput.DEFAULT, end_state)
+			current_state = end_state
+
+		elif isinstance(grammar, GrammarReference):
+			current_state = self.iterate(current_state, states, rules[grammar.identifier].grammar, rules)
 
 		else:
-			raise NotImplementedError()
+			raise NotImplementedError('The {0} expression has no implementation.'.format(grammar.__class__.__name__))
 
 		return current_state
 
