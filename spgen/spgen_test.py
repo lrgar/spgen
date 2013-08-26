@@ -944,5 +944,25 @@ class TestLexerGenerator(unittest.TestCase):
 		result = match_grammar(grammar, 'habíaunárabellamadoلyunchinollamado家')
 		self.assertEqual(result, [(0, 36, 'a')])
 
+	def test_table_traverser_13(self):
+		grammar = """ token a : '\\w'*; """
+		self.assertRaises(LexerError, match_grammar, grammar, 'there\'s no space')
+
+	def test_table_traverser_14(self):
+		grammar = """ token a : '\\w'*; """
+		self.assertRaises(LexerError, match_grammar, grammar, '42')
+
+	def test_table_traverser_15(self):
+		grammar = """ token a : '\\d'*; """
+		self.assertRaises(LexerError, match_grammar, grammar, 'asdadasd')
+
+	def test_table_traverser_16(self):
+		grammar = """ token a : '\\s'*; """
+		self.assertRaises(LexerError, match_grammar, grammar, ' 	\nd    \r   ')
+
+	def test_table_traverser_17(self):
+		grammar = """ token a : 'abc'; """
+		self.assertRaises(LexerError, match_grammar, grammar, 'abcde')
+
 if __name__ == '__main__':
 	unittest.main()
