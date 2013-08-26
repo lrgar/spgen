@@ -38,7 +38,7 @@ def read_arguments(args):
 	return grammar_file, output_language
 
 def usage():
-	print('Usage: python spgen.py -g <input-file>')
+	print('Usage: python spgen.py -g <input-file> -l <language>')
 	print('Version: ' + version)
 	print('Copyright (c) 2013 Luis Garcia')
 	print('')
