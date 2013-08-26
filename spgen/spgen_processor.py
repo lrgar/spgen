@@ -28,7 +28,7 @@ class LexerInput:
 		self._value = value
 
 	def __repr__(self):
-		return self._value
+		return '{0}({1})'.format(self.__class__.__name__, self._value)
 
 	def __lt__(self, other):
 		return self._value < other._value
@@ -66,6 +66,9 @@ class LexerInput:
 
 		if b < a: return LexerInput.match(b, a)
 
+		if a != LexerInput.DEFAULT and a == b:
+			return True
+
 		if a == LexerInput.ANY:
 			return True
 
@@ -99,7 +102,7 @@ class LexerInput:
 			return a == b
 
 		# For comparing DEFAULT
-		raise NotImplementedError('Input comparison not implemented.')
+		raise NotImplementedError('Input comparison not implemented between {0} and {1}.'.format(str(a), str(b)))
 
 LexerInput.DEFAULT = LexerInput._generate('A00default')
 LexerInput.ANY = LexerInput._generate('A01any')

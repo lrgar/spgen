@@ -81,6 +81,9 @@ class SpecialInput:
 	def __eq__(self, other):
 		return self._value == other._value
 
+	def __hash__(self):
+		return self._value
+
 SpecialInput.ANY = SpecialInput(1)
 SpecialInput.DIGIT = SpecialInput(2)
 SpecialInput.NON_DIGIT = SpecialInput(3)
@@ -228,6 +231,9 @@ class GrammarExpression:
 class GrammarConstant(GrammarExpression):
 	def __init__(self, value):
 		self._value = value
+
+	def __eq__(self, other):
+		return list(self._value) == list(other._value)
 
 	@property
 	def value(self):
@@ -495,7 +501,7 @@ class Parser:
 		result = self.expect_string(source_iterator)
 		if result is not None:
 			source_iterator.release()
-			return GrammarConstant(result)
+			return GrammarConstant(recognize_input_scape(result))
 
 		if self.expect_token(source_iterator, '(', alphanumeric_token = False):
 			result = self.expect_token_grammar_list(source_iterator)

@@ -390,6 +390,10 @@ class TestTokenRuleGrammarParser(unittest.TestCase):
 			SpecialInput.WHITESPACE,
 			'c'])
 
+	def test_special_input_recognition_6(self):
+		result = recognize_input_scape('\\w')
+		self.assertEqual(result, [SpecialInput.LETTER])
+
 def create_nfa_graph(moves, accepting_states):
 	states = {}
 
@@ -895,6 +899,37 @@ class TestLexerGenerator(unittest.TestCase):
 		              token t : 'bar'; """
 		result = match_grammar(grammar, 'bar')
 		self.assertEqual(result, [(0, 3, 't')])
+
+	def test_table_traverser_7(self):
+		grammar = """ token a : '!=';
+		              token b : '!';
+		              token c : '='; """
+		result = match_grammar(grammar, '!=')
+		self.assertEqual(result, [(0, 2, 'a')])
+
+	def test_table_traverser_8(self):
+		grammar = """ token a : '\\d'*;
+		              token b : '\\w'*;
+		              token c : '\\s'*; """
+		result = match_grammar(grammar, 'h3llo world 42')
+		self.assertEqual(result, [(0, 1, 'b'), (1, 1, 'a'), (2, 3, 'b'), (5, 1, 'c'), (6, 5, 'b'), (11, 1, 'c'), (12, 2, 'a')])
+
+	def test_table_traverser_9(self):
+		grammar = """ token a : '\\w'('\\w'*)('\\d'*); """
+		result = match_grammar(grammar, 'anIdentifier42')
+		self.assertEqual(result, [(0, 14, 'a')])
+
+	def test_table_traverser_10(self):
+		grammar = """ token a : '\\w'*;
+		              token b : 'var'; """
+		result = match_grammar(grammar, 'var')
+		self.assertEqual(result, [(0, 3, 'a'), (0, 3, 'b')])
+
+	def test_table_traverser_11(self):
+		grammar = """ token a : 'var';
+		              token b : '\\w'*; """
+		result = match_grammar(grammar, 'var')
+		self.assertEqual(result, [(0, 3, 'a'), (0, 3, 'b')])
 
 if __name__ == '__main__':
 	unittest.main()
