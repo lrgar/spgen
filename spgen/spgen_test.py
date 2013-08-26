@@ -198,6 +198,10 @@ class TestParser(unittest.TestCase):
 		result, token_info = Parser().try_token(SourceIterator(''))
 		self.assertEqual(result, False)
 
+	def test_token_detection_12(self):
+		result, token_info = Parser().try_token(SourceIterator('token á家ل : \'a\' ;'))
+		self.assertEqual(result, True)
+
 	def test_fragment_detection_1(self):
 		result, fragment_info = Parser().try_fragment(SourceIterator('fragment var : \'var\';'))
 		self.assertEqual(result, True)
@@ -393,6 +397,10 @@ class TestTokenRuleGrammarParser(unittest.TestCase):
 	def test_special_input_recognition_6(self):
 		result = recognize_input_scape('\\w')
 		self.assertEqual(result, [SpecialInput.LETTER])
+
+	def test_special_input_recognition_7(self):
+		result = recognize_input_scape('á家ل')
+		self.assertEqual(result, ['á', '家', 'ل'])
 
 def create_nfa_graph(moves, accepting_states):
 	states = {}
@@ -930,6 +938,11 @@ class TestLexerGenerator(unittest.TestCase):
 		              token b : '\\w'*; """
 		result = match_grammar(grammar, 'var')
 		self.assertEqual(result, [(0, 3, 'a'), (0, 3, 'b')])
+
+	def test_table_traverser_12(self):
+		grammar = """ token a : '\\w'*; """
+		result = match_grammar(grammar, 'habíaunárabellamadoلyunchinollamado家')
+		self.assertEqual(result, [(0, 36, 'a')])
 
 if __name__ == '__main__':
 	unittest.main()

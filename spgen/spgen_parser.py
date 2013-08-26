@@ -7,7 +7,10 @@
 
 # TODO: support /* ... */ comments.
 
-import sys, copy, string
+import sys
+import copy
+import string
+import unicodedata
 from collections import OrderedDict
 
 class ParserError(Exception):
@@ -397,7 +400,7 @@ class Parser:
 		valid = token_index == len(token)
 
 		if valid and alphanumeric_token:
-			if self.is_alphanumeric(source_iterator.current_item):
+			if source_iterator.current_item != SourceIterator.EOF and self.is_alphanumeric(source_iterator.current_item):
 				valid = False
 
 		if valid:
@@ -412,10 +415,10 @@ class Parser:
 		self.skip_whitespace(source_iterator)
 
 		identifier = ''
-		if self.is_alpha(source_iterator.current_item):
+		if source_iterator.current_item != SourceIterator.EOF and self.is_alpha(source_iterator.current_item):
 			identifier += source_iterator.current_item
 			source_iterator.next()
-			while self.is_alphanumeric(source_iterator.current_item):
+			while source_iterator.current_item != SourceIterator.EOF and self.is_alphanumeric(source_iterator.current_item):
 				identifier += source_iterator.current_item
 				source_iterator.next()
 
@@ -520,4 +523,4 @@ class Parser:
 		return self.is_alpha(character) or character in string.digits
 
 	def is_alpha(self, character):
-		return character in string.ascii_letters
+		return unicodedata.category(character) in ['Ll', 'Lm', 'Lo', 'Lt', 'Lu']

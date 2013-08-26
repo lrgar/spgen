@@ -8,12 +8,13 @@
 from spgen_parser import *
 from collections import deque
 import string
+import unicodedata
 
 def _is_digit(char):
 	return char in string.digits
 
 def _is_letter(char):
-	return char in string.ascii_letters
+	return unicodedata.category(char) in ['Ll', 'Lm', 'Lo', 'Lt', 'Lu']
 
 def _is_whitespace(char):
 	return char in string.whitespace
