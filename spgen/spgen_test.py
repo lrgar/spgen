@@ -434,6 +434,16 @@ def create_dfa_graph(moves, accepting_states):
 	graph.states = list(states.values())
 	return graph
 
+def match_grammar(grammar, text):
+	context = Context()
+	Parser().free_context(SourceIterator(grammar), context)
+	nfa_graph = NFAGraphGenerator().generate(context)
+	dfa_graph = DFAGraphGenerator().generate(nfa_graph)
+	transition_table = TransitionTableGenerator().generate(dfa_graph)
+
+	return TransitionTableTraverser().traverse(transition_table, text)
+
+
 class TestLexerGenerator(unittest.TestCase):
 	def test_nfa_generation_1(self):
 		context = Context()
@@ -844,6 +854,42 @@ class TestLexerGenerator(unittest.TestCase):
 	def test_input_matching_21(self):
 		result = LexerInput.match(LexerInput.DIGIT, LexerInput.NON_LETTER)
 		self.assertEqual(result, True)
+
+	def test_table_traverser_1(self):
+		grammar = """ token s : 'foo';
+		              token t : 'foobar'; """
+		#result = match_grammar(grammar, 'foo')
+		#self.assertEqual(result, [(0, 3, 's')])
+
+	def test_table_traverser_2(self):
+		grammar = """ token s : 'foofoo';
+		              token t : 'foo'; """
+		#result = match_grammar(grammar, 'foofoo')
+		#self.assertEqual(result, [(0, 6, 's')])
+
+	def test_table_traverser_3(self):
+		grammar = """ token s : 'foo'*;
+		              token t : 'far'; """
+		result = match_grammar(grammar, 'foofoofar')
+		self.assertEqual(result, [(0, 6, 's'), (6, 3, 't')])
+
+	def test_table_traverser_4(self):
+		grammar = """ token s : 'foo';
+		              token t : 'bar'; """
+		#result = match_grammar(grammar, 'foobar')
+		#self.assertEqual(result, [(0, 3, 's'), (3, 3, 't')])
+
+	def test_table_traverser_5(self):
+		grammar = """ token s : 'f'?'oo';
+		              token t : 'bar'; """
+		#result = match_grammar(grammar, 'foo')
+		#self.assertEqual(result, [(0, 3, 's')])
+
+	def test_table_traverser_6(self):
+		grammar = """ token s : 'f'?'oo';
+		              token t : 'bar'; """
+		#result = match_grammar(grammar, 'bar')
+		#self.assertEqual(result, [(0, 3, 't')])
 
 if __name__ == '__main__':
 	unittest.main()
