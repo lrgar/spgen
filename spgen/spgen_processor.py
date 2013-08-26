@@ -286,7 +286,9 @@ class NFAGraphGenerator:
 
 		for key, rule in context.rules.items():
 			if rule.type == RuleTypes.TOKEN:
-				last_state = self.iterate(start_state, states, rule.grammar)
+				rule_start_state = self.create_state(states)
+				start_state.consume(LexerInput.DEFAULT, rule_start_state)
+				last_state = self.iterate(rule_start_state, states, rule.grammar)
 				last_state.rule = rule.name
 
 		nfa_graph = NFAGraph()
@@ -476,10 +478,7 @@ class TransitionTableTraverser:
 
 				next_state = current_state.on(text[index])
 				if next_state is None:
-					import pdb; pdb.set_trace()
 					if last_valid_state is not None and last_valid_index != token_offset:
-						print('ASASD' + text[index])
-						print('ASASD' + index)
 						for r in last_valid_state.rules:
 							output.append((token_offset, last_valid_index - token_offset, r))
 						current_state = start_state

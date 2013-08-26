@@ -452,11 +452,12 @@ class TestLexerGenerator(unittest.TestCase):
 
 		expected = create_nfa_graph(
 					moves = [
-						(0, 1, LexerInput.char('v')),
-						(1, 2, LexerInput.char('a')),
-						(2, 3, LexerInput.char('r'))],
+						(0, 1, LexerInput.DEFAULT),
+						(1, 2, LexerInput.char('v')),
+						(2, 3, LexerInput.char('a')),
+						(3, 4, LexerInput.char('r'))],
 					accepting_states = [
-						(3, 'var')])
+						(4, 'var')])
 
 		self.assertEqual(result, expected)
 
@@ -467,12 +468,13 @@ class TestLexerGenerator(unittest.TestCase):
 
 		expected = create_nfa_graph(
 					moves = [
-						(0, 1, LexerInput.char('v')),
-						(1, 2, LexerInput.char('a')),
-						(2, 3, LexerInput.char('r')),
-						(0, 3, LexerInput.DEFAULT)],
+						(0, 1, LexerInput.DEFAULT),
+						(1, 2, LexerInput.char('v')),
+						(2, 3, LexerInput.char('a')),
+						(3, 4, LexerInput.char('r')),
+						(1, 4, LexerInput.DEFAULT)],
 					accepting_states = [
-						(3, 't')])
+						(4, 't')])
 
 		self.assertEqual(result, expected)
 
@@ -484,12 +486,13 @@ class TestLexerGenerator(unittest.TestCase):
 		expected = create_nfa_graph(
 					moves = [
 						(0, 1, LexerInput.DEFAULT),
-						(0, 2, LexerInput.char('v')),
-						(2, 3, LexerInput.char('a')),
-						(3, 4, LexerInput.char('r')),
-						(4, 0, LexerInput.DEFAULT)],
+						(1, 2, LexerInput.DEFAULT),
+						(1, 3, LexerInput.char('v')),
+						(3, 4, LexerInput.char('a')),
+						(4, 5, LexerInput.char('r')),
+						(5, 1, LexerInput.DEFAULT)],
 					accepting_states = [
-						(1, 't')])
+						(2, 't')])
 		
 		self.assertEqual(result, expected)
 
@@ -500,16 +503,17 @@ class TestLexerGenerator(unittest.TestCase):
 
 		expected = create_nfa_graph(
 					moves = [
-						(0, 1, LexerInput.char('v')),
-						(1, 2, LexerInput.char('a')),
-						(2, 3, LexerInput.char('r')),
-						(3, 4, LexerInput.DEFAULT),
-						(3, 5, LexerInput.char('v')),
-						(5, 6, LexerInput.char('a')),
-						(6, 7, LexerInput.char('r')),
-						(7, 3, LexerInput.DEFAULT)],
+						(0, 1, LexerInput.DEFAULT),
+						(1, 2, LexerInput.char('v')),
+						(2, 3, LexerInput.char('a')),
+						(3, 4, LexerInput.char('r')),
+						(4, 5, LexerInput.DEFAULT),
+						(4, 6, LexerInput.char('v')),
+						(6, 7, LexerInput.char('a')),
+						(7, 8, LexerInput.char('r')),
+						(8, 4, LexerInput.DEFAULT)],
 					accepting_states = [
-						(4, 't')])
+						(5, 't')])
 		
 		self.assertEqual(result, expected)
 
@@ -524,15 +528,16 @@ class TestLexerGenerator(unittest.TestCase):
 		expected = create_nfa_graph(
 					moves = [
 						(0, 1, LexerInput.DEFAULT),
-						(0, 2, LexerInput.char('v')),
-						(2, 3, LexerInput.char('a')),
-						(3, 4, LexerInput.char('r')),
-						(4, 0, LexerInput.DEFAULT),
-						(1, 5, LexerInput.char('f')),
-						(5, 6, LexerInput.char('o')),
-						(6, 7, LexerInput.char('o'))],
+						(1, 2, LexerInput.DEFAULT),
+						(1, 3, LexerInput.char('v')),
+						(3, 4, LexerInput.char('a')),
+						(4, 5, LexerInput.char('r')),
+						(5, 1, LexerInput.DEFAULT),
+						(2, 6, LexerInput.char('f')),
+						(6, 7, LexerInput.char('o')),
+						(7, 8, LexerInput.char('o'))],
 					accepting_states = [
-						(7, 't')])
+						(8, 't')])
 		
 		self.assertEqual(result, expected)
 
@@ -858,14 +863,14 @@ class TestLexerGenerator(unittest.TestCase):
 	def test_table_traverser_1(self):
 		grammar = """ token s : 'foo';
 		              token t : 'foobar'; """
-		#result = match_grammar(grammar, 'foo')
-		#self.assertEqual(result, [(0, 3, 's')])
+		result = match_grammar(grammar, 'foo')
+		self.assertEqual(result, [(0, 3, 's')])
 
 	def test_table_traverser_2(self):
 		grammar = """ token s : 'foofoo';
 		              token t : 'foo'; """
-		#result = match_grammar(grammar, 'foofoo')
-		#self.assertEqual(result, [(0, 6, 's')])
+		result = match_grammar(grammar, 'foofoo')
+		self.assertEqual(result, [(0, 6, 's')])
 
 	def test_table_traverser_3(self):
 		grammar = """ token s : 'foo'*;
@@ -876,20 +881,20 @@ class TestLexerGenerator(unittest.TestCase):
 	def test_table_traverser_4(self):
 		grammar = """ token s : 'foo';
 		              token t : 'bar'; """
-		#result = match_grammar(grammar, 'foobar')
-		#self.assertEqual(result, [(0, 3, 's'), (3, 3, 't')])
+		result = match_grammar(grammar, 'foobar')
+		self.assertEqual(result, [(0, 3, 's'), (3, 3, 't')])
 
 	def test_table_traverser_5(self):
 		grammar = """ token s : 'f'?'oo';
 		              token t : 'bar'; """
-		#result = match_grammar(grammar, 'foo')
-		#self.assertEqual(result, [(0, 3, 's')])
+		result = match_grammar(grammar, 'foo')
+		self.assertEqual(result, [(0, 3, 's')])
 
 	def test_table_traverser_6(self):
 		grammar = """ token s : 'f'?'oo';
 		              token t : 'bar'; """
-		#result = match_grammar(grammar, 'bar')
-		#self.assertEqual(result, [(0, 3, 't')])
+		result = match_grammar(grammar, 'bar')
+		self.assertEqual(result, [(0, 3, 't')])
 
 if __name__ == '__main__':
 	unittest.main()
