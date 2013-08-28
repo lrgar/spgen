@@ -1,12 +1,10 @@
 # spgen
 
-_Simple Parser Generator_ is a small tool for creating parsers for C++, and maybe sometime, other
-languages.
+_Simple Parser Generator_ is a small tool for creating parsers for C++, and maybe someday, other languages.
 
 ## Background
 
-It's just a Python script, created for the Nova project. I didn't find any existing toolkit enough
-easy to install and use so I end up creating my own. It's still fun anyway.
+It's a Python script, created originally for my own compiler project. I didn't find any existing toolkit enough easy to install and use so I end up creating my own. It has been fun anyway.
 
 ## Requirements
 
@@ -14,7 +12,9 @@ The script requires Python 3.
 
 ## Development
 
-This project is in development, it doesn't even fulfill its goal, so don't use it. Yet.
+Current version: 0.1.0-alpha
+
+This project is in development, in an alpha phase, and it doesn't even fulfil its goal, so don't use it. Yet.
 
 ## License
 
