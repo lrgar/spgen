@@ -10,6 +10,7 @@ from template_serializer import *
 
 class MockClass(TagBase):
 	def __init__(self):
+		super().__init__()
 		self._name = ''
 
 	def set_arguments(self, name = ''):
