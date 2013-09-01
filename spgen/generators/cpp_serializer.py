@@ -58,10 +58,31 @@ class CppClass(TagBase):
 
 	def serialize(self, context):
 		context.write('class {0} {{'.format(self._name))
-		context.indent()
-		for child in self.children:
-			child.serialize(context)
-		context.unindent()
+
+		private_children = [child for child in self.children if child.visibility == PRIVATE]
+		if len(private_children) > 0:
+			context.write('private:')
+			context.indent()
+			for child in private_children:
+				child.serialize(context)
+			context.unindent()
+
+		public_children = [child for child in self.children if child.visibility == PUBLIC]
+		if len(public_children) > 0:
+			context.write('public:')
+			context.indent()
+			for child in public_children:
+				child.serialize(context)
+			context.unindent()
+
+		protected_children = [child for child in self.children if child.visibility == PROTECTED]
+		if len(protected_children) > 0:
+			context.write('protected:')
+			context.indent()
+			for child in protected_children:
+				child.serialize(context)
+			context.unindent()
+
 		context.write('}}; // class {0}'.format(self._name))
 
 	def set_arguments(self, name, visibility = PUBLIC):
@@ -99,12 +120,16 @@ class CppMethod(TagBase):
 			temp = '{0} {1}({2})'.format(self._return_type, self._name, args)
 
 		if self._implemented:
-			context.write(temp + ' {{')
-			context.indent()
-			for child in self.children:
-				child.serialize(context)
-			context.unindent()
-			context.write(temp + '}}')
+			if len(self.children) == 0:
+				context.write(temp + ' {}')
+			else:
+				context.write(temp + ' {')
+				context.indent()
+				for child in self.children:
+					child.serialize(context)
+				context.unindent()
+				context.write('}')
+				context.new_line()
 		else:
 			context.write(temp + ';')
 

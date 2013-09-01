@@ -34,7 +34,7 @@ def generate_header_file(output_header_file, lexer_transition_table, rules, prop
 							name = 'Visit{0}'.format(rule),
 							virtual = True,
 							return_type = 'void',
-							implemented = False,
+							implemented = True,
 							arguments = [
 								('context', 'LexerProcessorContext &'),
 								('info', 'const TokenInfo &')
