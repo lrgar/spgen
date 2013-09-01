@@ -1,5 +1,5 @@
 #
-# spgen.py
+# cpp.py
 #
 # Copyright (c) 2013 Luis Garcia.
 # This source file is subject to terms of the MIT License. (See accompanying file LICENSE)
@@ -8,6 +8,7 @@
 """C++ compiler code generator."""
 
 import os
+from generators.cpp_serializer import *
 
 class Properties:
 	OUTPUT_CPP_HEADER = 'outputCppHeader'
@@ -19,26 +20,36 @@ class Properties:
 module_name = 'C++ code generator'
 
 def generate_header_file(output_header_file, lexer_transition_table, rules, properties):
-	with open(output_header_file, 'w') as output:
-		output.write('#include <string>\n')
-		output.write('\n')
-		output.write('namespace {0} {{\n'.format(properties[Properties.DEFAULT_MODULE_NAME]))
-		output.write('namespace Parser {\n')
-		output.write('\n')
-		output.write('  class LexerProcessorContext {};\n')
-		output.write('\n')
-		output.write('  class TokenInfo {};\n')
-		output.write('\n')
-		output.write('  class AbstractTokenListener {\n')
-		output.write('  public:\n')
+	template = cpp_file [
+		cpp_include(file = '<string>'),
 
-		for rule_name, info in rules.items():		
-			output.write('    virtual void Visit{0}(LexerProcessorContext & context, const TokenInfo & info) {{}}\n'.format(rule_name))
-		output.write('  };\n')
+		cpp_namespace(name = properties[Properties.DEFAULT_MODULE_NAME]) [
+			cpp_namespace(name = 'Parser') [
+				cpp_class(name = 'LexerProcessorContext'),
+				cpp_class(name = 'TokenInfo'),
+				cpp_class(name = 'AbstractTokenListener') [
+					for_each(rules, function =
+						lambda rule: cpp_method(
+							visibility = PUBLIC,
+							name = 'Visit{0}'.format(rule),
+							virtual = True,
+							return_type = 'void',
+							implemented = False,
+							arguments = [
+								('context', 'LexerProcessorContext &'),
+								('info', 'const TokenInfo &')
+							])
+						)
+				]
+			]
+		]
+	]
 
-		output.write('\n')
-		output.write('} // namespace Parser\n')
-		output.write('}} // namespace {0}\n'.format(properties[Properties.DEFAULT_MODULE_NAME]))
+	serializer = Serializer()
+	output = serializer.serialize(template)
+
+	with open(output_header_file, 'w') as f:
+		f.write(output)
 
 def generate_code(info):
 	if Properties.OUTPUT_CPP_SOURCE not in info.properties:
