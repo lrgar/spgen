@@ -54,14 +54,14 @@ class Tag:
 		return self
 
 	def serialize(self, context):
-		return self.flatten().serialize(context)
+		return _serializer_flatten(self).serialize(context)
 
 	def _list(self):
 		return [self]
 
-	def flatten(self):
-		source = itertools.chain(* list(t._list() for t in self._children))
-		items = [e.flatten() for e in source]
+	def _flatten(self):
+		source = itertools.chain(* list(_serializer_list(t) for t in self._children))
+		items = [_serializer_flatten(e) for e in source]
 		if len(items) > 0:
 			self._element.set_children(items)
 		return self._element
@@ -76,11 +76,11 @@ class TagHandler:
 	def __getitem__(self, children):
 		return Tag(self._class)[children]
 
-	def flatten(self):
-		return Tag(self._class).flatten()
+	def _flatten(self):
+		return _serializer_flatten(Tag(self._class))
 
 	def _list(self):
-		return Tag(self._class)._list()
+		return _serializer_list(Tag(self._class))
 
 class ForEachHandler:
 	def __init__(self, enumerable, function):
@@ -88,7 +88,7 @@ class ForEachHandler:
 		self._function = function
 
 	def _list(self):
-		return itertools.chain(* list(self._function(e)._list() for e in self._enumerable))
+		return itertools.chain(* list(_serializer_list(self._function(e)) for e in self._enumerable))
 
 class SerializerContext:
 	def __init__(self):
@@ -107,6 +107,12 @@ class SerializerContext:
 	def unindent(self):
 		self._indentation -= 4
 
+	def serialize(self, object):
+		if isinstance(object, str):
+			self.write(object)
+		else:
+			object.serialize(self)
+
 	@property
 	def indentation(self):
 		return self._indentation
@@ -121,5 +127,20 @@ class Serializer:
 		template.serialize(context)
 		return context.output
 
+	def flatten(self, template):
+		return _serializer_flatten(template)
+
 def for_each(enumerable, function):
 	return ForEachHandler(enumerable, function)
+
+def _serializer_flatten(value):
+	if isinstance(value, str):
+		return value
+	else:
+		return value._flatten()
+
+def _serializer_list(value):
+	if isinstance(value, str):
+		return [value]
+	else:
+		return value._list()

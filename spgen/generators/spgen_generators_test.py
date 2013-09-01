@@ -26,7 +26,7 @@ class TestTemplateSerializer(unittest.TestCase):
 		tag = TagHandler(MockClass)
 		template = tag(name = 'element')
 		expected = MockClass().set_arguments(name = 'element')
-		self.assertEqual(template.flatten(), expected)
+		self.assertEqual(Serializer().flatten(template), expected)
 
 	def test_tag_handler_2(self):
 		tag = TagHandler(MockClass)
@@ -41,7 +41,7 @@ class TestTemplateSerializer(unittest.TestCase):
 				MockClass().set_arguments(name = 'child-2')
 				])
 
-		self.assertEqual(template.flatten(), expected)
+		self.assertEqual(Serializer().flatten(template), expected)
 
 	def test_tag_handler_3(self):
 		tag = TagHandler(MockClass)
@@ -52,7 +52,7 @@ class TestTemplateSerializer(unittest.TestCase):
 				MockClass()
 				])
 
-		self.assertEqual(template.flatten(), expected)
+		self.assertEqual(Serializer().flatten(template), expected)
 
 	def test_tag_for_each_1(self):
 		tag = TagHandler(MockClass)
@@ -69,7 +69,7 @@ class TestTemplateSerializer(unittest.TestCase):
 				MockClass().set_arguments(name = 'child-3')
 				])
 
-		self.assertEqual(template.flatten(), expected)
+		self.assertEqual(Serializer().flatten(template), expected)
 
 	def test_tag_for_each_2(self):
 		tag = TagHandler(MockClass)
@@ -92,7 +92,7 @@ class TestTemplateSerializer(unittest.TestCase):
 				MockClass().set_arguments(name = 'child-6')
 				])
 
-		self.assertEqual(template.flatten(), expected)
+		self.assertEqual(Serializer().flatten(template), expected)
 
 if __name__ == '__main__':
 	unittest.main()
