@@ -10,9 +10,9 @@ from generators.cpp_serializer import *
 
 def generate_header_template(module_name, rules):
 	return cpp_file [
-		cpp_include(file = '<string>'),
-		cpp_include(file = '<vector>'),
-		cpp_include(file = '<istream>'),
+		'#include <string>',
+		'#include <vector>',
+		'#include <istream>',
 
 		cpp_namespace(name = module_name) [
 			cpp_namespace(name = 'Parser') [
@@ -172,6 +172,27 @@ def generate_header_template(module_name, rules):
 								('listener', 'AbstractTokenListener &')
 							])
 				],
+			]
+		]
+	]
+
+def generate_source_template(module_name, rules, header_file):
+	return cpp_file [
+		'#include "{0}"'.format(header_file),
+
+		cpp_namespace(name = module_name) [
+			cpp_namespace(name = 'Parser') [
+				cpp_method(
+						visibility = PUBLIC,
+						name = 'LexerProcessor::Process',
+						virtual = True,
+						return_type = 'void',
+						implemented = True,
+						arguments = [
+								('input', 'std::basic_istream<char> &'),
+								('listener', 'AbstractTokenListener &')
+						]
+					),
 			]
 		]
 	]

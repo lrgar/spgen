@@ -31,7 +31,7 @@ class TagBase:
 
 	def serialize(self, context):
 		for child in self._children:
-			child.serialize(context)
+			context.serialize(child)
 
 	@property
 	def children(self):

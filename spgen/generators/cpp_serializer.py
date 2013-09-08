@@ -14,22 +14,6 @@ PROTECTED = 'protected'
 class CppFile(TagBase):
 	pass
 
-class CppInclude(TagBase):
-	def __init__(self):
-		super().__init__()
-		self._file = ''
-
-	def set_arguments(self, file):
-		self._file = file
-		return self
-
-	def serialize(self, context):
-		context.write('#include {0}'.format(self._file))
-
-	@property
-	def file(self):
-		return self._file
-
 class CppNamespace(TagBase):
 	def __init__(self):
 		super().__init__()
@@ -348,7 +332,6 @@ class CppDestructor(TagBase):
 
 
 cpp_file = TagHandler(CppFile)
-cpp_include = TagHandler(CppInclude)
 cpp_namespace = TagHandler(CppNamespace)
 cpp_class = TagHandler(CppClass)
 cpp_struct = TagHandler(CppStruct)
