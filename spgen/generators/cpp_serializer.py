@@ -57,7 +57,12 @@ class CppClass(TagBase):
 		self._unit_name = unit_name
 
 	def serialize(self, context):
-		context.write('{0} {1} {{'.format(self._unit_name, self._name))
+		temp = '{0} {1}'.format(self._unit_name, self._name)
+		if len(self._inherits) > 0:
+			temp += ' : ' + ', '.join(['{0} {1}'.format(v, n) for n, v in self._inherits])
+		temp += ' {'
+
+		context.write(temp)
 
 		private_children = [child for child in self.children if child.visibility == PRIVATE]
 		if len(private_children) > 0:
@@ -86,9 +91,10 @@ class CppClass(TagBase):
 		context.write('}}; // class {0}'.format(self._name))
 		context.new_line()
 
-	def set_arguments(self, name, visibility = PUBLIC):
+	def set_arguments(self, name, inherits = [], visibility = PUBLIC):
 		self._name = name
 		self._visibility = visibility
+		self._inherits = inherits
 		return self
 
 	@property
@@ -99,6 +105,9 @@ class CppClass(TagBase):
 	def visibility(self):
 		return self._visibility
 
+	@property
+	def inherits(self):
+		return self._inherits
 
 class CppStruct(CppClass):
 	def __init__(self):
@@ -163,18 +172,32 @@ class CppMethod(TagBase):
 	def arguments(self):
 		return self._arguments
 
+	@property
+	def const(self):
+		return self._const
+
 class CppAttribute(TagBase):
 	def __init__(self):
 		super().__init__()
 
-	def set_arguments(self, name, attr_type, visibility = PUBLIC):
+	def set_arguments(self, name, attr_type, const = False, static = False, value = '', visibility = PUBLIC):
 		self._name = name
 		self._visibility = visibility
 		self._attr_type = attr_type
+		self._const = const
+		self._static = static
+		self._value = value
 		return self
 
 	def serialize(self, context):
-		context.write('{0} {1};'.format(self._attr_type, self._name))
+		line = ''
+		if self._static: line += 'static '
+		if self._const: line += 'const '
+		line += '{0} {1}'.format(self._attr_type, self._name)
+		if self._value != '': line += ' = {0}'.format(self._value)
+		line += ';'
+
+		context.write(line)
 
 	@property
 	def name(self):
@@ -187,6 +210,18 @@ class CppAttribute(TagBase):
 	@property
 	def attr_type(self):
 		return self._attr_type
+
+	@property
+	def const(self):
+		return self._const
+
+	@property
+	def static(self):
+		return self._static
+
+	@property
+	def value(self):
+		return self._value
 
 class CppEnum(TagBase):
 	def __init__(self):
@@ -225,7 +260,7 @@ class CppConstructor(TagBase):
 	def __init__(self):
 		super().__init__()
 
-	def set_arguments(self, name, arguments, visibility = PUBLIC, implemented = False, initializers = []):
+	def set_arguments(self, name, arguments = [], visibility = PUBLIC, implemented = False, initializers = []):
 		self._name = name
 		self._visibility = visibility
 		self._arguments = arguments
@@ -265,12 +300,52 @@ class CppConstructor(TagBase):
 		return self._virtual
 
 	@property
-	def return_type(self):
-		return self._return_type
-
-	@property
 	def arguments(self):
 		return self._arguments
+
+
+class CppDestructor(TagBase):
+	def __init__(self):
+		super().__init__()
+
+	def set_arguments(self, name, visibility = PUBLIC, virtual = False, implemented = False):
+		self._name = name
+		self._visibility = visibility
+		self._implemented = implemented
+		self._virtual = virtual
+		return self
+
+	def serialize(self, context):
+		temp = ''
+		if self._virtual: temp += 'virtual '
+		temp += '{0}()'.format(self._name)
+
+		if self._implemented:
+			if len(self.children) == 0:
+				context.write(temp + ' {}')
+			else:
+				context.write(temp + ' {')
+				context.indent()
+				for child in self.children:
+					context.serialize(child)
+				context.unindent()
+				context.write('}')
+				context.new_line()
+		else:
+			context.write(temp + ';')
+
+	@property
+	def name(self):
+		return self._name
+
+	@property
+	def visibility(self):
+		return self._visibility
+
+	@property
+	def virtual(self):
+		return self._virtual
+
 
 cpp_file = TagHandler(CppFile)
 cpp_include = TagHandler(CppInclude)
@@ -281,3 +356,4 @@ cpp_method = TagHandler(CppMethod)
 cpp_attribute = TagHandler(CppAttribute)
 cpp_enum = TagHandler(CppEnum)
 cpp_constructor = TagHandler(CppConstructor)
+cpp_destructor = TagHandler(CppDestructor)
