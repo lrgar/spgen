@@ -108,13 +108,14 @@ class CppMethod(TagBase):
 	def __init__(self):
 		super().__init__()
 
-	def set_arguments(self, name, return_type, arguments, virtual = False, visibility = PUBLIC, implemented = False):
+	def set_arguments(self, name, return_type = 'void', arguments = [], virtual = False, visibility = PUBLIC, implemented = False, const = False):
 		self._name = name
 		self._visibility = visibility
 		self._virtual = virtual
 		self._return_type = return_type
 		self._arguments = arguments
 		self._implemented = implemented
+		self._const = const
 		return self
 
 	def serialize(self, context):
@@ -124,6 +125,9 @@ class CppMethod(TagBase):
 			temp = 'virtual {0} {1}({2})'.format(self._return_type, self._name, args)
 		else:
 			temp = '{0} {1}({2})'.format(self._return_type, self._name, args)
+
+		if self._const:
+			temp += ' const'
 
 		if self._implemented:
 			if len(self.children) == 0:
