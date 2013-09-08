@@ -67,7 +67,7 @@ def generate_header_template(module_name, rules):
 					cpp_destructor(
 							visibility = PUBLIC,
 							name = '~AbstractTokenListener',
-							implemented = False,
+							implemented = True,
 							virtual = True),
 
 					for_each(rules, function =
