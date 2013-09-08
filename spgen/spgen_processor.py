@@ -471,11 +471,11 @@ class TransitionTableTraverser:
 		last_valid_index = -1
 
 		while token_offset < len(text):
-			if index == len(text):
-				if len(current_state.rules) > 0:
-					last_valid_state = current_state
-					last_valid_index = index
+			if len(current_state.rules) > 0:
+				last_valid_state = current_state
+				last_valid_index = index
 
+			if index == len(text):
 				if last_valid_state is not None and last_valid_index != token_offset:
 					for r in last_valid_state.rules:
 						output.append((token_offset, last_valid_index - token_offset, r))
@@ -485,13 +485,9 @@ class TransitionTableTraverser:
 					last_valid_state = None
 					last_valid_index = -1
 				else:
-					raise LexerError('Failed to match \'{0}\' character'.format(text[index]))
+					raise LexerError('End of file found without any matching rule.')
 
 			else:
-				if len(current_state.rules) > 0:
-					last_valid_state = current_state
-					last_valid_index = index
-
 				next_state = current_state.on(text[index])
 				if next_state is None:
 					if last_valid_state is not None and last_valid_index != token_offset:
