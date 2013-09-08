@@ -9,6 +9,8 @@
 
 import os
 from generators.cpp_serializer import *
+import generators.cpp_templates
+import spgen_parser
 
 class Properties:
 	OUTPUT_CPP_HEADER = 'outputCppHeader'
@@ -20,93 +22,10 @@ class Properties:
 module_name = 'C++ code generator'
 
 def generate_header_file(output_header_file, lexer_transition_table, rules, properties):
-	template = cpp_file [
-		cpp_include(file = '<string>'),
-
-		cpp_namespace(name = properties[Properties.DEFAULT_MODULE_NAME]) [
-			cpp_namespace(name = 'Parser') [
-				cpp_class(name = 'LexerProcessorContext'),
-
-				cpp_class(name = 'TokenInfo'),
-
-				cpp_class(name = 'AbstractTokenListener') [
-					for_each(rules, function =
-						lambda rule: cpp_method(
-							visibility = PUBLIC,
-							name = 'Visit{0}'.format(rule),
-							virtual = True,
-							return_type = 'void',
-							implemented = True,
-							arguments = [
-								('context', 'LexerProcessorContext &'),
-								('info', 'const TokenInfo &')
-							])
-						),
-
-					cpp_method(
-							visibility = PUBLIC,
-							name = 'BeforeToken',
-							virtual = True,
-							return_type = 'void',
-							implemented = True,
-							arguments = [
-								('context', 'LexerProcessorContext &'),
-								('info', 'const TokenInfo &')
-							]
-						),
-
-					cpp_method(
-							visibility = PUBLIC,
-							name = 'AfterToken',
-							virtual = True,
-							return_type = 'void',
-							implemented = True,
-							arguments = [
-								('context', 'LexerProcessorContext &'),
-								('info', 'const TokenInfo &')
-							]
-						)
-				],
-
-				cpp_enum(name = 'TokenId', values = ['{0}Token'.format(rule) for rule in rules]),
-
-				cpp_struct(name = 'Token') [
-					cpp_attribute(name = 'Id', attr_type = 'TokenId', visibility = PUBLIC),
-					cpp_attribute(name = 'Value', attr_type = 'std::string', visibility = PUBLIC)
-				],
-
-				cpp_class(name = 'SimpleTokenReader') [
-					cpp_attribute(name = '_output', attr_type = 'vector<Token> &', visibility = PRIVATE),
-
-					cpp_constructor(
-							visibility = PUBLIC,
-							name = 'SimpleTokenReader',
-							implemented = True,
-							arguments = [
-								('output', 'vector<Token> &')
-							],
-							initializers = [
-								('_output', 'output')
-							]
-						),
-
-					cpp_method(
-							visibility = PUBLIC,
-							name = 'AfterToken',
-							virtual = True,
-							return_type = 'void',
-							implemented = True,
-							arguments = [
-								('context', 'LexerProcessorContext &'),
-								('info', 'const TokenInfo &')
-							]) [
-								'Token token = { info.getTokenId(), info.getString() };',
-								'_output.push_back(token);'
-							]
-				],
-			]
-		]
-	]
+	template = generators.cpp_templates.generate_header_template(
+		module_name = properties[Properties.DEFAULT_MODULE_NAME],
+		rules = [r for r, v in rules.items() if v.type == spgen_parser.RuleTypes.TOKEN]
+		)
 
 	serializer = Serializer()
 	output = serializer.serialize(template)
