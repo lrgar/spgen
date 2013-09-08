@@ -11,6 +11,8 @@ from generators.cpp_serializer import *
 def generate_header_template(module_name, rules):
 	return cpp_file [
 		cpp_include(file = '<string>'),
+		cpp_include(file = '<vector>'),
+		cpp_include(file = '<istream>'),
 
 		cpp_namespace(name = module_name) [
 			cpp_namespace(name = 'Parser') [
@@ -109,14 +111,14 @@ def generate_header_template(module_name, rules):
 				],
 
 				cpp_class(name = 'SimpleTokenReader', inherits = [ ('AbstractTokenListener', PUBLIC) ]) [
-					cpp_attribute(name = '_output', attr_type = 'vector<Token> &', visibility = PRIVATE),
+					cpp_attribute(name = '_output', attr_type = 'std::vector<Token> &', visibility = PRIVATE),
 
 					cpp_constructor(
 							visibility = PUBLIC,
 							name = 'SimpleTokenReader',
 							implemented = True,
 							arguments = [
-								('output', 'vector<Token> &')
+								('output', 'std::vector<Token> &')
 							],
 							initializers = [
 								('_output', 'output')
@@ -138,7 +140,6 @@ def generate_header_template(module_name, rules):
 							return_type = 'void',
 							implemented = True,
 							arguments = [
-								('context', 'LexerProcessorContext &'),
 								('info', 'const TokenInfo &')
 							]) [
 								'Token token = { info.GetTokenId(), info.GetString() };',
