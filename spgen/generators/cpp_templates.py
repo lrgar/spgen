@@ -16,8 +16,6 @@ def generate_header_template(module_name, rules):
 			cpp_namespace(name = 'Parser') [
 				cpp_enum(name = 'TokenId', values = ['{0}Token'.format(rule) for rule in rules]),
 
-				cpp_class(name = 'LexerProcessorContext'),
-
 				cpp_class(name = 'TokenInfo') [
 					cpp_attribute(name = '_tokenId', attr_type = 'TokenId', visibility = PRIVATE),
 					cpp_attribute(name = '_string', attr_type = 'std::string', visibility = PRIVATE),
@@ -37,7 +35,7 @@ def generate_header_template(module_name, rules):
 							name = 'SetTokenId',
 							implemented = True,
 							arguments = [
-								('TokenId', 'tokenId')
+								('tokenId', 'TokenId')
 							]) [
 								'_tokenId = tokenId;'
 							],
@@ -57,13 +55,19 @@ def generate_header_template(module_name, rules):
 							name = 'SetString',
 							implemented = True,
 							arguments = [
-								('std::string', 'tokenString')
+								('tokenString', 'std::string')
 							]) [
 								'_string = tokenString;'
 							],
 				],
 
 				cpp_class(name = 'AbstractTokenListener') [
+					cpp_destructor(
+							visibility = PUBLIC,
+							name = '~AbstractTokenListener',
+							implemented = False,
+							virtual = True),
+
 					for_each(rules, function =
 							lambda rule: cpp_method(
 								visibility = PUBLIC,
@@ -72,7 +76,6 @@ def generate_header_template(module_name, rules):
 								return_type = 'void',
 								implemented = True,
 								arguments = [
-									('context', 'LexerProcessorContext &'),
 									('info', 'const TokenInfo &')
 								])
 							),
@@ -84,7 +87,6 @@ def generate_header_template(module_name, rules):
 							return_type = 'void',
 							implemented = True,
 							arguments = [
-								('context', 'LexerProcessorContext &'),
 								('info', 'const TokenInfo &')
 							]
 						),
@@ -96,7 +98,6 @@ def generate_header_template(module_name, rules):
 							return_type = 'void',
 							implemented = True,
 							arguments = [
-								('context', 'LexerProcessorContext &'),
 								('info', 'const TokenInfo &')
 							]
 						)
@@ -107,7 +108,7 @@ def generate_header_template(module_name, rules):
 					cpp_attribute(name = 'Value', attr_type = 'std::string', visibility = PUBLIC)
 				],
 
-				cpp_class(name = 'SimpleTokenReader') [
+				cpp_class(name = 'SimpleTokenReader', inherits = [ ('AbstractTokenListener', PUBLIC) ]) [
 					cpp_attribute(name = '_output', attr_type = 'vector<Token> &', visibility = PRIVATE),
 
 					cpp_constructor(
@@ -151,6 +152,23 @@ def generate_header_template(module_name, rules):
 							implemented = False,
 							arguments = [
 								('other', 'const SimpleTokenReader &')
+							])
+				],
+
+				cpp_class(name = 'LexerProcessor') [
+					cpp_constructor(
+							visibility = PUBLIC,
+							name = 'LexerProcessor',
+							implemented = True),
+
+					cpp_method(
+							visibility = PUBLIC,
+							name = 'Process',
+							return_type = 'void',
+							implemented = False,
+							arguments = [
+								('input', 'std::basic_istream<char> &'),
+								('listener', 'AbstractTokenListener &')
 							])
 				],
 			]
