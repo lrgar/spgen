@@ -1,0 +1,21 @@
+//
+// test-01.spg
+//
+// Copyright (c) 2013 Luis Garcia.
+// This source file is subject to terms of the MIT License. (See accompanying file LICENSE)
+//
+
+property defaultModuleName = 'Test01';
+property outputDirectory = 'gen';
+
+token Whitespace         : '\s' ;
+token Identifier         : Letter LetterOrDigit* ;
+token FixedToken         : 'token' ;
+token Equal              : '==' ;
+token NotEqual           : '!=' ;
+token Not                : '!' ;
+token Assign             : '=' ;
+
+fragment LetterOrDigit   : Letter | Digit;
+fragment Letter          : '\w' ;
+fragment Digit           : '\d' ;
