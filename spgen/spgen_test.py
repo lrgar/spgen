@@ -1,4 +1,4 @@
-#
+﻿#
 # spgen_test.py
 #
 # Copyright (c) 2013 Luis Garcia.
