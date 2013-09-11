@@ -33,6 +33,18 @@ def generate_header_file(output_header_file, lexer_transition_table, rules, prop
 	with open(output_header_file, 'w') as f:
 		f.write(output)
 
+def generate_source_file(output_source_file, header_file, lexer_transition_table, rules, properties):
+	template = generators.cpp_templates.generate_source_template(
+		module_name = properties[Properties.DEFAULT_MODULE_NAME],
+		header_file = header_file
+	)
+
+	serializer = Serializer()
+	output = serializer.serialize(template)
+
+	with open(output_source_file, 'w') as f:
+		f.write(output)
+
 def generate_code(info):
 	if Properties.OUTPUT_CPP_SOURCE not in info.properties:
 		info.properties[Properties.OUTPUT_CPP_SOURCE] = '{0}Parser.cpp'.format(info.properties[Properties.DEFAULT_MODULE_NAME])
@@ -52,8 +64,20 @@ def generate_code(info):
 		info.properties[Properties.OUTPUT_DIRECTORY],
 		info.properties[Properties.OUTPUT_CPP_HEADER]))
 
+	output_source_file = os.path.normpath(os.path.join(
+		os.getcwd(),
+		info.properties[Properties.OUTPUT_DIRECTORY],
+		info.properties[Properties.OUTPUT_CPP_SOURCE]))
+
 	generate_header_file(
 		output_header_file,
+		info.lexer_transition_table,
+		info.rules,
+		info.properties)
+
+	generate_source_file(
+		output_source_file,
+		info.properties[Properties.OUTPUT_CPP_HEADER],
 		info.lexer_transition_table,
 		info.rules,
 		info.properties)
