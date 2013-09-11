@@ -58,12 +58,19 @@ def main(args):
 		context.properties['defaultModuleName'] = root
 		context.properties['grammarFilePath'] = os.path.abspath(grammar_file)
 		context.properties['grammarFileName'] = os.path.basename(grammar_file)
-		context.properties['outputDirectory'] = os.path.dirname(os.path.abspath(grammar_file))
 
 		parser.Parser().process_file(grammar_file, context)
 		nfa_graph = processor.NFAGraphGenerator().generate(context)
 		dfa_graph = processor.DFAGraphGenerator().generate(nfa_graph)
 		transition_table = processor.TransitionTableGenerator().generate(dfa_graph)
+
+		default_output_directory = os.path.dirname(os.path.abspath(grammar_file))
+		if 'outputDirectory' in context.properties:
+			context.properties['outputDirectory'] = os.path.join(
+				default_output_directory,
+				context.properties['outputDirectory'])
+		else:
+			context.properties['outputDirectory'] = default_output_directory
 
 		generate_code(output_language, transition_table, context.properties, context.rules)
 	except parser.ParserError as err:
