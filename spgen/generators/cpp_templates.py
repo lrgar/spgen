@@ -176,7 +176,7 @@ def generate_header_template(module_name, rules):
 		]
 	]
 
-def generate_source_template(module_name, rules, header_file):
+def generate_source_template(module_name, header_file):
 	return cpp_file [
 		'#include "{0}"'.format(header_file),
 
@@ -185,7 +185,6 @@ def generate_source_template(module_name, rules, header_file):
 				cpp_method(
 						visibility = PUBLIC,
 						name = 'LexerProcessor::Process',
-						virtual = True,
 						return_type = 'void',
 						implemented = True,
 						arguments = [
