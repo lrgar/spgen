@@ -40,7 +40,6 @@
   <ItemGroup>
     <Content Include="test\gen\Test01Parser.cpp" />
     <Content Include="test\gen\Test01Parser.h" />
-    <Content Include="test\gen\Test01Parser.obj" />
     <Content Include="test\test.bat" />
     <Content Include="test\Test01.cpp" />
     <Content Include="test\test01.spg" />

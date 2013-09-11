@@ -1,0 +1,17 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "spgen", "spgen.pyproj", "{545CDBE7-C63A-4E4D-9AE8-87E630906059}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Python|Any CPU = Python|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{545CDBE7-C63A-4E4D-9AE8-87E630906059}.Python|Any CPU.ActiveCfg = Python|Any CPU
+		{545CDBE7-C63A-4E4D-9AE8-87E630906059}.Python|Any CPU.Build.0 = Python|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
