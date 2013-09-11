@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{545cdbe7-c63a-4e4d-9ae8-87e630906059}</ProjectGuid>
+    <ProjectHome />
+    <StartupFile>spgen.py</StartupFile>
+    <SearchPath />
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <IsWindowsApplication>False</IsWindowsApplication>
+    <LaunchProvider>Standard Python launcher</LaunchProvider>
+    <CommandLineArguments>-l cpp -g test\test01.spg</CommandLineArguments>
+    <InterpreterPath />
+    <InterpreterArguments />
+    <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Python' " />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <ItemGroup>
+    <Compile Include="spgen.py" />
+    <Compile Include="spgen_parser.py" />
+    <Compile Include="spgen_processor.py" />
+    <Compile Include="spgen_test.py" />
+    <Compile Include="generators\cpp.py" />
+    <Compile Include="generators\cpp_serializer.py" />
+    <Compile Include="generators\cpp_templates.py" />
+    <Compile Include="generators\spgen_generators_test.py" />
+    <Compile Include="generators\template_serializer.py" />
+    <Compile Include="generators\__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="generators" />
+    <Folder Include="test\" />
+    <Folder Include="test\gen\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="test\gen\Test01Parser.cpp" />
+    <Content Include="test\gen\Test01Parser.h" />
+    <Content Include="test\gen\Test01Parser.obj" />
+    <Content Include="test\test.bat" />
+    <Content Include="test\Test01.cpp" />
+    <Content Include="test\test01.spg" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" />
+</Project>
