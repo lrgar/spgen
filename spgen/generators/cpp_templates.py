@@ -178,20 +178,43 @@ def generate_header_template(module_name, rules):
 
 def generate_source_template(module_name, header_file):
 	return cpp_file [
-		'#include "{0}"'.format(header_file),
+		'#include "{0}"'.format(header_file), new_line,
+
+		'#include <cctype>',
 
 		cpp_namespace(name = module_name) [
 			cpp_namespace(name = 'Parser') [
-				cpp_method(
+				cpp_class(name = 'LexerProcessorImpl', inherits = [ ('AbstractTokenListener', PUBLIC) ]) [
+					cpp_method(
 						visibility = PUBLIC,
+						name = 'Process',
+						return_type = 'void',
+						implemented = True,
+						arguments = [
+							('input', 'std::basic_istream<char> &'),
+							('listener', 'AbstractTokenListener &')
+						]) [
+							'char c;',
+							'int state = 0;',
+							'while (input >> c) {',
+							indent [
+								''
+							],
+							'}'
+						]
+				],
+
+				cpp_method(
 						name = 'LexerProcessor::Process',
 						return_type = 'void',
 						implemented = True,
 						arguments = [
-								('input', 'std::basic_istream<char> &'),
-								('listener', 'AbstractTokenListener &')
+							('input', 'std::basic_istream<char> &'),
+							('listener', 'AbstractTokenListener &')
+						]) [
+							'LexerProcessorImpl impl;',
+							'impl.Process(input, listener);'
 						]
-					),
 			]
 		]
 	]
