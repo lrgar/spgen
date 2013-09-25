@@ -26,10 +26,7 @@
     <Compile Include="spgen_processor.py" />
     <Compile Include="spgen_test.py" />
     <Compile Include="generators\cpp.py" />
-    <Compile Include="generators\cpp_serializer.py" />
     <Compile Include="generators\cpp_templates.py" />
-    <Compile Include="generators\spgen_generators_test.py" />
-    <Compile Include="generators\template_serializer.py" />
     <Compile Include="generators\__init__.py" />
   </ItemGroup>
   <ItemGroup>
