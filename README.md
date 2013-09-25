@@ -18,4 +18,4 @@ This project is in development, in an alpha phase, and it doesn't even fulfil it
 
 ## License
 
-This projects use the [MIT License](LICENSE.md).
+This project use the [MIT License](LICENSE.md).
