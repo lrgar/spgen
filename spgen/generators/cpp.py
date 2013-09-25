@@ -8,8 +8,8 @@
 """C++ compiler code generator."""
 
 import os
-from generators.cpp_serializer import *
 import generators.cpp_templates
+import scope
 import spgen_parser
 
 class Properties:
@@ -27,8 +27,7 @@ def generate_header_file(output_header_file, lexer_transition_table, rules, prop
 		rules = [r for r, v in rules.items() if v.type == spgen_parser.RuleTypes.TOKEN]
 		)
 
-	serializer = Serializer()
-	output = serializer.serialize(template)
+	output = scope.serialize(template)
 
 	with open(output_header_file, 'w') as f:
 		f.write(output)
@@ -39,8 +38,7 @@ def generate_source_file(output_source_file, header_file, lexer_transition_table
 		header_file = header_file
 	)
 
-	serializer = Serializer()
-	output = serializer.serialize(template)
+	output = scope.serialize(template)
 
 	with open(output_source_file, 'w') as f:
 		f.write(output)
